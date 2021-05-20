@@ -78,8 +78,32 @@ int main(int, char **)
         {
           game_active = false;
         }
-
+        /*
         if (event.key.keysym.scancode == SDL_SCANCODE_W)
+        {
+          move_x = move_x + 5;
+          move_y = move_y + 5;
+        }
+        break;
+        */
+
+        if (event.key.keysym.scancode == SDL_SCANCODE_RIGHT)
+        {
+          move_x = move_x + 5;
+        }
+        else if (event.key.keysym.scancode == SDL_SCANCODE_LEFT)
+        {
+          move_x = move_x - 5;
+        }
+        else if (event.key.keysym.scancode == SDL_SCANCODE_UP)
+        {
+          move_y = move_y - 5;
+        }
+        else if (event.key.keysym.scancode == SDL_SCANCODE_DOWN)
+        {
+          move_y = move_y + 5;
+        }
+        else if (event.key.keysym.scancode == SDL_SCANCODE_W)
         {
           move_x = move_x + 5;
           move_y = move_y + 5;
