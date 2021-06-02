@@ -152,7 +152,7 @@ game_c initialize_all()
     ////-----------
 
     /// PLAYERS
-    //game.players.push_back(player_c({0.2, 10}));
+    game.player = player_c({10, 10});  // todo ????
     //game.players.push_back(player_c({1.5, 10}));
 
 
@@ -169,129 +169,194 @@ game_c initialize_all()
 
     /// keyboard mapping
     // player 1
-    game.keyboard_map.push_back({{"right", SDL_SCANCODE_RIGHT},
+    // game.keyboard_map.push_back({{"right", SDL_SCANCODE_RIGHT},
+    //     {"left", SDL_SCANCODE_LEFT},
+    //     {"up", SDL_SCANCODE_UP},
+    //     {"down", SDL_SCANCODE_DOWN}});
+    // stickman
+    game.keyboard_map = std::map<std::string, int> {{"right", SDL_SCANCODE_RIGHT},
         {"left", SDL_SCANCODE_LEFT},
         {"up", SDL_SCANCODE_UP},
-        {"down", SDL_SCANCODE_DOWN}});
-    // stickman
-    game.keyboard_map.push_back({{"right", SDL_SCANCODE_D},
-        {"left", SDL_SCANCODE_A},
-        {"up", SDL_SCANCODE_W},
-        {"down", SDL_SCANCODE_S}});
+        {"down", SDL_SCANCODE_DOWN},};
     
 
 
     return game;
 }
 
-int main(int, char **)
+int process_input(game_c& game)
+{
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) { // check if there are some events
+        if (event.type == SDL_QUIT)
+            return false;
+    }
+    auto kbdstate = SDL_GetKeyboardState(NULL);
+    game.player.intentions.clear();
+        for (auto [k, v] : game.keyboard_map) {
+            if (kbdstate[v]) game.player.intentions[k] = 1;
+    }
+    return true;
+}
+//-------------------
+// int main(int, char **)
+// {
+//     using namespace std;
+//     using namespace std::chrono;
+//     using namespace tp::operators;
+
+//     SDL_Init(SDL_INIT_EVERYTHING);
+//     IMG_Init(IMG_INIT_PNG);
+//     shared_ptr<SDL_Window> window_p(
+//         SDL_CreateWindow("Better Worms", SDL_WINDOWPOS_UNDEFINED,
+//                          SDL_WINDOWPOS_UNDEFINED, 640, 640, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE),
+//         [](auto *window)
+//         { SDL_DestroyWindow(window); });
+
+//     shared_ptr<SDL_Renderer> renderer_p(
+//         SDL_CreateRenderer(window_p.get(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC),
+//         [](auto *renderer)
+//         {
+//             SDL_DestroyRenderer(renderer);
+//         });
+
+//     // to scale window
+//     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+//     SDL_RenderSetLogicalSize(renderer_p.get(), 640, 360);
+
+//     // IMG_LoadTexture - load photo from disk
+
+//     shared_ptr<SDL_Texture> tex_p(IMG_LoadTexture(renderer_p.get(), "data/ring.jpg"),
+//                                   [](auto *tex)
+//                                   { SDL_DestroyTexture(tex); });
+
+//     shared_ptr<SDL_Texture> tex_p1(IMG_LoadTexture(renderer_p.get(), "data/g4.png"),
+//                                    [](auto *tex)
+//                                    { SDL_DestroyTexture(tex); });
+
+
+//     shared_ptr<SDL_Texture> stickman(IMG_LoadTexture(renderer_p.get(), "data/stickman.png"),
+//                                      [](auto *tex)
+//                                      { SDL_DestroyTexture(tex); });
+
+//     //player_c player();
+//      player_c player;
+
+//     milliseconds dt(15);                                         // przyrost czasu
+//     steady_clock::time_point current_time = steady_clock::now(); // remember current time
+
+//     for (bool game_active = true; game_active;)
+//     {
+//         steady_clock::time_point frame_start = steady_clock::now();
+//         SDL_Event event;
+//         while (SDL_PollEvent(&event))
+//         { // check if there are some events
+//             if (event.type == SDL_QUIT)
+//                 game_active = false;
+//         }
+//         //key pressed all the time or inactive
+//         auto kbdstate = SDL_GetKeyboardState(NULL);
+
+//         if (kbdstate[SDL_SCANCODE_RIGHT])
+//             player.intentions["right"] = 1;
+//         if (kbdstate[SDL_SCANCODE_LEFT])
+//             player.intentions["left"] = 1;
+//         if (kbdstate[SDL_SCANCODE_UP])
+//             player.intentions["up"] = 1;
+//         if (kbdstate[SDL_SCANCODE_DOWN])
+//             player.intentions["down"] = 1;
+
+
+//         /// fizyka
+//         double dt_f = dt.count() / 1000.0;
+//         player.apply_intent();
+//         // player.update1(dt_f, [&](auto p, auto pos, auto vel)
+//         //               {
+//         //                   if (pos[1] < 30)
+//         //                   {
+//         //                       p->position = pos;
+//         //                       p->velocity = vel;
+//         //                       p->friction = 0.2;
+//         //                   }
+//         //                   else
+//         //                   {
+//         //                       p->velocity = {(vel[0] * vel[0] > 2.2) ? vel[0] : 0.0, 0};
+//         //                       p->position[0] = pos[0];
+//         //                       p->friction = 0.3;
+//         //                   }
+//         //               });
+
+//         player.update(dt_f);
+
+//         /// grafika
+//         SDL_SetRenderDrawColor(renderer_p.get(), 0, 100, 20, 255);
+//         SDL_RenderClear(renderer_p.get());
+//         SDL_SetRenderDrawColor(renderer_p.get(), 255, 100, 200, 255);
+
+//         // show photo 'tex_p' as background
+//         SDL_RenderCopy(renderer_p.get(), tex_p.get(), NULL, NULL);
+
+        
+//         // show small photo 'tex_p' without rotation
+//         draw_o(renderer_p, player.position * 10.0, tex_p1, 100, 160, 0);
+
+//         // render, position_x, position_y, texture, n_freq, umber_sprites, w, h, dest_x, dest_y
+//         vk::draw_animation(renderer_p, 10, 10, stickman, 4, 0, 100, 50, 50, 100, 100);
+
+//         //------------------
+//         SDL_RenderPresent(renderer_p.get());
+
+//         this_thread::sleep_until(current_time = current_time + dt);
+
+//         steady_clock::time_point frame_end = steady_clock::now();
+
+//         // std::cout << "frame time: " << (frame_end - frame_start).count() << std::endl;
+//     }
+//     SDL_Quit();
+//     return 0;
+// }
+
+//----------------------
+int main(int, char**)
 {
     using namespace std;
     using namespace std::chrono;
-    using namespace tp::operators;
 
-    SDL_Init(SDL_INIT_EVERYTHING);
-    IMG_Init(IMG_INIT_PNG);
-    shared_ptr<SDL_Window> window_p(
-        SDL_CreateWindow("Better Worms", SDL_WINDOWPOS_UNDEFINED,
-                         SDL_WINDOWPOS_UNDEFINED, 640, 640, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE),
-        [](auto *window)
-        { SDL_DestroyWindow(window); });
-
-    shared_ptr<SDL_Renderer> renderer_p(
-        SDL_CreateRenderer(window_p.get(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC),
-        [](auto *renderer)
-        {
-            SDL_DestroyRenderer(renderer);
-        });
-
-    // to scale window
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-    SDL_RenderSetLogicalSize(renderer_p.get(), 640, 360);
-
-    // IMG_LoadTexture - load photo from disk
-
-    shared_ptr<SDL_Texture> tex_p(IMG_LoadTexture(renderer_p.get(), "data/ring.jpg"),
-                                  [](auto *tex)
-                                  { SDL_DestroyTexture(tex); });
-
-    shared_ptr<SDL_Texture> tex_p1(IMG_LoadTexture(renderer_p.get(), "data/g4.png"),
-                                   [](auto *tex)
-                                   { SDL_DestroyTexture(tex); });
-
-
-    shared_ptr<SDL_Texture> stickman(IMG_LoadTexture(renderer_p.get(), "data/stickman.png"),
-                                     [](auto *tex)
-                                     { SDL_DestroyTexture(tex); });
-
-    player_c player;
-
-    milliseconds dt(15);                                         // przyrost czasu
+    auto game = initialize_all();
     steady_clock::time_point current_time = steady_clock::now(); // remember current time
+    for (bool game_active = true; game_active;) {
+        game_active = process_input(game);
 
-    for (bool game_active = true; game_active;)
-    {
-        steady_clock::time_point frame_start = steady_clock::now();
-        SDL_Event event;
-        while (SDL_PollEvent(&event))
-        { // check if there are some events
-            if (event.type == SDL_QUIT)
-                game_active = false;
-        }
-        //key pressed all the time or inactive
-        auto kbdstate = SDL_GetKeyboardState(NULL);
+         //TODO
+         /// fizyka
+        double dt_f = game.dt.count() / 100.0;
+        //double dt_f = game.dt.count() / 1000.0;
+        game.player.apply_intent();
+        
 
-        if (kbdstate[SDL_SCANCODE_RIGHT])
-            player.intentions["right"] = 1;
-        if (kbdstate[SDL_SCANCODE_LEFT])
-            player.intentions["left"] = 1;
-        if (kbdstate[SDL_SCANCODE_UP])
-            player.intentions["up"] = 1;
-        if (kbdstate[SDL_SCANCODE_DOWN])
-            player.intentions["down"] = 1;
+        game.player.update(dt_f);
 
-
-        /// fizyka
-        double dt_f = dt.count() / 1000.0;
-        player.apply_intent();
-        player.update(dt_f, [&](auto p, auto pos, auto vel)
-                      {
-                          if (pos[1] < 30)
-                          {
-                              p->position = pos;
-                              p->velocity = vel;
-                              p->friction = 0.2;
-                          }
-                          else
-                          {
-                              p->velocity = {(vel[0] * vel[0] > 2.2) ? vel[0] : 0.0, 0};
-                              p->position[0] = pos[0];
-                              p->friction = 0.3;
-                          }
-                      });
         /// grafika
-        SDL_SetRenderDrawColor(renderer_p.get(), 0, 100, 20, 255);
-        SDL_RenderClear(renderer_p.get());
-        SDL_SetRenderDrawColor(renderer_p.get(), 255, 100, 200, 255);
+        SDL_SetRenderDrawColor(game.renderer_p.get(), 0, 100, 20, 255);
+        SDL_RenderClear(game.renderer_p.get());
+        SDL_SetRenderDrawColor(game.renderer_p.get(), 255, 100, 200, 255);
 
         // show photo 'tex_p' as background
-        SDL_RenderCopy(renderer_p.get(), tex_p.get(), NULL, NULL);
+        //SDL_RenderCopy(game.renderer_p.get(), game.textures["background"], NULL, NULL);
 
         
         // show small photo 'tex_p' without rotation
-        draw_o(renderer_p, player.position * 10.0, tex_p1, 100, 160, 0);
+        draw_o(game.renderer_p, game.player.position, game.textures["player1"], 100, 160, 0);
 
         // render, position_x, position_y, texture, n_freq, umber_sprites, w, h, dest_x, dest_y
-        vk::draw_animation(renderer_p, 10, 10, stickman, 4, 0, 100, 50, 50, 100, 100);
+        vk::draw_animation(game.renderer_p, 10, 10, game.textures["stickman"], 4, 0, 100, 50, 50, 100, 100);
 
         //------------------
-        SDL_RenderPresent(renderer_p.get());
+        SDL_RenderPresent(game.renderer_p.get());
 
-        this_thread::sleep_until(current_time = current_time + dt);
+        this_thread::sleep_until(current_time = current_time + game.dt);
 
         steady_clock::time_point frame_end = steady_clock::now();
-
-        // std::cout << "frame time: " << (frame_end - frame_start).count() << std::endl;
     }
     SDL_Quit();
     return 0;
