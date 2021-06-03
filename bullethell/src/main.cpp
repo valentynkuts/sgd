@@ -317,6 +317,59 @@ int process_input(game_c& game)
 // }
 
 //----------------------
+
+
+void draw_scene(game_c& game)
+{
+    using namespace tp::operators;
+    using namespace vk;
+
+    SDL_SetRenderDrawColor(game.renderer_p.get(), 0, 100, 20, 255);
+    SDL_RenderClear(game.renderer_p.get());
+    SDL_SetRenderDrawColor(game.renderer_p.get(), 255, 100, 200, 255);
+
+     //-----------------------
+    // for (auto &o: game.obstacles) {
+    //     draw_obstacle(game.renderer_p, o.position * 10.0, game.textures.at(o.texture), o.size[0]*10, o.size[1]*10, 0);
+    // }
+
+    // // DRAW ALL PLAYERS
+    // for (unsigned i = 0; i < game.players.size(); i++) {
+    //     auto& player = game.players[i];
+    //     draw_o(game.renderer_p, player.position * 10.0, game.textures.at("player[" + std::to_string(i) + "]"), 16, 16, player.position[0] * 36 + player.position[1] * 5);
+    //     if (player.is_safe_place())
+    //         draw_o(game.renderer_p, player.position * 10.0, game.textures.at("player[" + std::to_string(i) + "]"), 16 + 4, 16 + 4, player.position[0] * 36 + player.position[1] * 5);
+
+    //     tp::draw_text(game.renderer_p, 10 + i * 130, 340, game.textures["font_10_red"], std::to_string((int)player.health));
+    //     tp::draw_text(game.renderer_p, 10 + i * 130 + 40, 340, game.textures["font_10_blue"], std::to_string((int)player.points));
+    // }
+    // // DRAW ALL EMITTERS
+    // for (unsigned i = 0; i < game.emitters.size(); i++) {
+    //     auto& emitter = game.emitters[i];
+    //     draw_o(game.renderer_p, emitter.position * 10.0, game.textures.at("emitter[" + std::to_string(i) + "]"), 16, 16, 0.0);
+    // }
+    // // DRAW ALL BULLETS
+    // for (unsigned i = 0; i < game.bullets.size(); i++) {
+    //     auto& bullet = game.bullets[i];
+    //     draw_o(game.renderer_p, bullet.position * 10.0, game.textures.at(bullet.type), 10, 10, 33.0);
+    // }
+     //---------------------
+
+    // show photo 'tex_p' as background
+        //SDL_RenderCopy(game.renderer_p.get(), game.textures["background"], NULL, NULL);
+
+        
+        // show small photo 'tex_p' without rotation
+        draw_o(game.renderer_p, game.player.position, game.textures["player1"], 100, 160, 0);
+
+        // render, position_x, position_y, texture, n_freq, umber_sprites, w, h, dest_x, dest_y
+        draw_animation(game.renderer_p, 10, 10, game.textures["stickman"], 4, 0, 100, 50, 50, 100, 100);
+
+
+    SDL_RenderPresent(game.renderer_p.get());
+}
+
+
 int main(int, char**)
 {
     using namespace std;
@@ -324,6 +377,7 @@ int main(int, char**)
 
     auto game = initialize_all();
     steady_clock::time_point current_time = steady_clock::now(); // remember current time
+
     for (bool game_active = true; game_active;) {
         game_active = process_input(game);
 
@@ -336,23 +390,25 @@ int main(int, char**)
 
         game.player.update(dt_f);
 
-        /// grafika
-        SDL_SetRenderDrawColor(game.renderer_p.get(), 0, 100, 20, 255);
-        SDL_RenderClear(game.renderer_p.get());
-        SDL_SetRenderDrawColor(game.renderer_p.get(), 255, 100, 200, 255);
+        draw_scene(game);
 
-        // show photo 'tex_p' as background
-        //SDL_RenderCopy(game.renderer_p.get(), game.textures["background"], NULL, NULL);
+        /// grafika
+        // SDL_SetRenderDrawColor(game.renderer_p.get(), 0, 100, 20, 255);
+        // SDL_RenderClear(game.renderer_p.get());
+        // SDL_SetRenderDrawColor(game.renderer_p.get(), 255, 100, 200, 255);
+
+        // // show photo 'tex_p' as background
+        // //SDL_RenderCopy(game.renderer_p.get(), game.textures["background"], NULL, NULL);
 
         
-        // show small photo 'tex_p' without rotation
-        draw_o(game.renderer_p, game.player.position, game.textures["player1"], 100, 160, 0);
+        // // show small photo 'tex_p' without rotation
+        // draw_o(game.renderer_p, game.player.position, game.textures["player1"], 100, 160, 0);
 
-        // render, position_x, position_y, texture, n_freq, umber_sprites, w, h, dest_x, dest_y
-        vk::draw_animation(game.renderer_p, 10, 10, game.textures["stickman"], 4, 0, 100, 50, 50, 100, 100);
+        // // render, position_x, position_y, texture, n_freq, umber_sprites, w, h, dest_x, dest_y
+        // vk::draw_animation(game.renderer_p, 10, 10, game.textures["stickman"], 4, 0, 100, 50, 50, 100, 100);
 
-        //------------------
-        SDL_RenderPresent(game.renderer_p.get());
+        // //------------------
+        // SDL_RenderPresent(game.renderer_p.get());
 
         this_thread::sleep_until(current_time = current_time + game.dt);
 
