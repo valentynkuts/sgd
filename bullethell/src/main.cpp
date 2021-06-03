@@ -105,11 +105,9 @@ void draw_o(std::shared_ptr<SDL_Renderer> r, std::array<double, 2> p, std::share
 //     std::vector<player_c> players;
 //     //std::vector<obstacle_c> obstacles;
 
-
 //     std::chrono::milliseconds dt;
 
 //     std::vector<std::map<std::string, int>> keyboard_map;
-
 
 // };
 
@@ -123,12 +121,14 @@ game_c initialize_all()
     /// WINDOW
     game.window_p = std::shared_ptr<SDL_Window>(
         SDL_CreateWindow("Better Worms", SDL_WINDOWPOS_UNDEFINED,
-            SDL_WINDOWPOS_UNDEFINED, 640, 360, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE),
-        [](auto* window) { SDL_DestroyWindow(window); });
+                         SDL_WINDOWPOS_UNDEFINED, 640, 360, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE),
+        [](auto *window)
+        { SDL_DestroyWindow(window); });
 
     game.renderer_p = std::shared_ptr<SDL_Renderer>(
         SDL_CreateRenderer(game.window_p.get(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC),
-        [](auto* renderer) {
+        [](auto *renderer)
+        {
             SDL_DestroyRenderer(renderer);
         });
 
@@ -136,25 +136,23 @@ game_c initialize_all()
     SDL_RenderSetLogicalSize(game.renderer_p.get(), 640, 360);
 
     /// MEDIA
-   
+
     game.textures["background"] = std::shared_ptr<SDL_Texture>(IMG_LoadTexture(game.renderer_p.get(), "data/ring.jpg"),
-                                  [](auto *tex)
-                                  { SDL_DestroyTexture(tex); });
+                                                               [](auto *tex)
+                                                               { SDL_DestroyTexture(tex); });
 
     game.textures["player1"] = std::shared_ptr<SDL_Texture>(IMG_LoadTexture(game.renderer_p.get(), "data/g4.png"),
-                                   [](auto *tex)
-                                   { SDL_DestroyTexture(tex); });
-
+                                                            [](auto *tex)
+                                                            { SDL_DestroyTexture(tex); });
 
     game.textures["stickman"] = std::shared_ptr<SDL_Texture>(IMG_LoadTexture(game.renderer_p.get(), "data/stickman.png"),
-                                     [](auto *tex)
-                                     { SDL_DestroyTexture(tex); });
+                                                             [](auto *tex)
+                                                             { SDL_DestroyTexture(tex); });
     ////-----------
 
     /// PLAYERS
-    game.player = player_c({10, 10});  // todo ????
+    game.player = player_c({50, 100}); // todo ????????????????
     //game.players.push_back(player_c({1.5, 10}));
-
 
     /// OBSTACLES
     // obstacle_c o;
@@ -162,7 +160,6 @@ game_c initialize_all()
     // o.size = {2,5};
     // o.texture = "font_10_blue";
     // game.obstacles.push_back(o);
-
 
     /// physics details
     game.dt = std::chrono::milliseconds(15);
@@ -174,27 +171,38 @@ game_c initialize_all()
     //     {"up", SDL_SCANCODE_UP},
     //     {"down", SDL_SCANCODE_DOWN}});
     // stickman
-    game.keyboard_map = std::map<std::string, int> {{"right", SDL_SCANCODE_RIGHT},
+    game.keyboard_map = std::map<std::string, int>{
+        {"right", SDL_SCANCODE_RIGHT},
         {"left", SDL_SCANCODE_LEFT},
         {"up", SDL_SCANCODE_UP},
-        {"down", SDL_SCANCODE_DOWN},};
+        {"down", SDL_SCANCODE_DOWN},
+    };
+
+    //  game.player.movements = std::map<std::string, std::vector<int>{
+    //     {"move_right", {5, 0}},
+    //     {"move_left", {5, 1}},
+    //     {"jump_up", {3, 2}},
+    // };
+
+    game.player.movements = {3, 2};
     
-
-
     return game;
 }
 
-int process_input(game_c& game)
+int process_input(game_c &game)
 {
     SDL_Event event;
-    while (SDL_PollEvent(&event)) { // check if there are some events
+    while (SDL_PollEvent(&event))
+    { // check if there are some events
         if (event.type == SDL_QUIT)
             return false;
     }
     auto kbdstate = SDL_GetKeyboardState(NULL);
     game.player.intentions.clear();
-        for (auto [k, v] : game.keyboard_map) {
-            if (kbdstate[v]) game.player.intentions[k] = 1;
+    for (auto [k, v] : game.keyboard_map)
+    {
+        if (kbdstate[v])
+            game.player.intentions[k] = 1;
     }
     return true;
 }
@@ -234,7 +242,6 @@ int process_input(game_c& game)
 //                                    [](auto *tex)
 //                                    { SDL_DestroyTexture(tex); });
 
-
 //     shared_ptr<SDL_Texture> stickman(IMG_LoadTexture(renderer_p.get(), "data/stickman.png"),
 //                                      [](auto *tex)
 //                                      { SDL_DestroyTexture(tex); });
@@ -266,7 +273,6 @@ int process_input(game_c& game)
 //         if (kbdstate[SDL_SCANCODE_DOWN])
 //             player.intentions["down"] = 1;
 
-
 //         /// fizyka
 //         double dt_f = dt.count() / 1000.0;
 //         player.apply_intent();
@@ -296,7 +302,6 @@ int process_input(game_c& game)
 //         // show photo 'tex_p' as background
 //         SDL_RenderCopy(renderer_p.get(), tex_p.get(), NULL, NULL);
 
-        
 //         // show small photo 'tex_p' without rotation
 //         draw_o(renderer_p, player.position * 10.0, tex_p1, 100, 160, 0);
 
@@ -318,19 +323,19 @@ int process_input(game_c& game)
 
 //----------------------
 
-void process_physics(game_c& game)
+void process_physics(game_c &game)
 {
     using namespace tp::operators;
     /// fizyka
-    
-      double dt_f = game.dt.count() / 100.0;
-        //double dt_f = game.dt.count() / 1000.0;
+
+    double dt_f = game.dt.count() / 100.0;
+    //double dt_f = game.dt.count() / 1000.0;
 
     auto old_player = game.player;
-          // update moves
-        game.player.apply_intent();
-        game.player.update(dt_f);
-    
+    // update moves
+    game.player.apply_intent();
+    game.player.update(dt_f);
+
     // // check colision between players
     // // they can interact with each other
     // for (unsigned i = 0; i < game.players.size(); i++) {
@@ -346,7 +351,6 @@ void process_physics(game_c& game)
     //     }
     // }
 
-
     // for (unsigned i = 0; i < game.players.size(); i++) {
     //     auto &p = game.players[i];
     //     for (auto &o : game.obstacles) {
@@ -360,22 +364,37 @@ void process_physics(game_c& game)
     //     }
     // }
 
-
     // // TODO
 
-    // // check collisions with ground - always active
-    // for (unsigned i = 0; i < game.players.size(); i++) {
-    //     if (game.players[i].position[1] < 32) {
-    //         game.players[i].friction = 0.2;
-    //     } else {
-    //         game.players[i].velocity = {(game.players[i].velocity[0] * game.players[i].velocity[0] > 2.2) ? game.players[i].velocity[0] : 0.0, 0};
-    //         game.players[i].position[1] = 32;
-    //         game.players[i].friction = 0.3;
-    //     }
+    // check collisions with ground - always active
+    // y - limit
+    int y = 152;
+    if (game.player.position[1] < y) //
+    {
+        game.player.friction = 0.2;
+    }
+    else
+    {
+        game.player.velocity = {(game.player.velocity[0] * game.player.velocity[0] > 2.2) ? game.player.velocity[0] : 0.0, 0};
+        game.player.position[1] = y;
+        game.player.friction = 0.3;
+    }
+
+    // if (pos[1] < 30)
+    // {
+    //     p->position = pos;
+    //     p->velocity = vel;
+    //     p->friction = 0.2;
+    // }
+    // else
+    // {
+    //     p->velocity = {(vel[0] * vel[0] > 2.2) ? vel[0] : 0.0, 0};
+    //     p->position[0] = pos[0];
+    //     p->friction = 0.3;
     // }
 }
 
-void draw_scene(game_c& game)
+void draw_scene(game_c &game)
 {
     using namespace tp::operators;
     using namespace vk;
@@ -384,7 +403,7 @@ void draw_scene(game_c& game)
     SDL_RenderClear(game.renderer_p.get());
     SDL_SetRenderDrawColor(game.renderer_p.get(), 255, 100, 200, 255);
 
-     //-----------------------
+    //-----------------------
     // for (auto &o: game.obstacles) {
     //     draw_obstacle(game.renderer_p, o.position * 10.0, game.textures.at(o.texture), o.size[0]*10, o.size[1]*10, 0);
     // }
@@ -409,24 +428,22 @@ void draw_scene(game_c& game)
     //     auto& bullet = game.bullets[i];
     //     draw_o(game.renderer_p, bullet.position * 10.0, game.textures.at(bullet.type), 10, 10, 33.0);
     // }
-     //---------------------
+    //---------------------
 
     // show photo 'tex_p' as background
-        //SDL_RenderCopy(game.renderer_p.get(), game.textures["background"], NULL, NULL);
+    //SDL_RenderCopy(game.renderer_p.get(), game.textures["background"], NULL, NULL);
 
-        
-        // show small photo 'tex_p' without rotation
-        draw_o(game.renderer_p, game.player.position, game.textures["player1"], 100, 160, 0);
+    // show small photo 'tex_p' without rotation
+    //draw_o(game.renderer_p, game.player.position, game.textures["player1"], 100, 160, 0);
 
-        // render, position_x, position_y, texture, n_freq, umber_sprites, w, h, dest_x, dest_y
-        draw_animation(game.renderer_p, 10, 10, game.textures["stickman"], 4, 0, 100, 50, 50, 100, 100);
-
+    // render, position_x, position_y, texture, n_freq, number_sprites, n_row, w, h, dest_x, dest_y
+    //draw_animation(game.renderer_p, 10, 10, game.textures["stickman"], 4, 0, 100, 50, 50, 100, 100);
+    draw_animation(game.renderer_p, game.player.position[0],  game.player.position[1], game.textures["stickman"], game.player.movements[0], game.player.movements[1], 100, 50, 50, 100, 100);
 
     SDL_RenderPresent(game.renderer_p.get());
 }
 
-
-int main(int, char**)
+int main(int, char **)
 {
     using namespace std;
     using namespace std::chrono;
@@ -434,19 +451,12 @@ int main(int, char**)
     auto game = initialize_all();
     steady_clock::time_point current_time = steady_clock::now(); // remember current time
 
-    for (bool game_active = true; game_active;) {
+    for (bool game_active = true; game_active;)
+    {
         game_active = process_input(game);
 
-         //TODO------------
-         /// fizyka
-        // double dt_f = game.dt.count() / 100.0;
-        // //double dt_f = game.dt.count() / 1000.0;
-        // game.player.apply_intent();
-        // game.player.update(dt_f);
-        //---------------- 
-        process_physics(game); 
+        process_physics(game);
         draw_scene(game);
-
 
         this_thread::sleep_until(current_time = current_time + game.dt);
 

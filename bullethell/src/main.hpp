@@ -126,6 +126,12 @@ class player_c : public physical_c
 {
 public:
     std::map<std::string, int> intentions;
+    // string - name of movement
+    // vector<int> - {number_of_sprites_in_row, number_of_row} 
+    // std::map<std::string, std::vector<int>> movements;
+
+    // vector<int> - {number_of_sprites_in_row, number_of_row} 
+    std::vector<int> movements;
 
 
     // player_c()
@@ -153,16 +159,23 @@ public:
     void apply_intent()
     {
         acceleration = {0, 30};
-        if (intentions.count("right"))
+        if (intentions.count("right")){
             acceleration[0] += 100;
-        if (intentions.count("left"))
+            // movements = {"move_right", {5, 0}};
+             movements = {5, 0};
+        }
+        if (intentions.count("left")){
             acceleration[0] += -100;
+           // movements =  {"move_left", {5, 1}};
+             movements = {5, 1};
+        }
         if (intentions.count("up"))
             acceleration[1] += -100;
         if (intentions.count("down"))
             acceleration[1] += +100;
 
         intentions.clear();
+        movements.clear();
     }
 
     void apply_intent1()
