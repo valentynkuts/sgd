@@ -23,6 +23,14 @@ namespace tp::operators
         return ret;
     }
 
+    inline std::array<double, 2> operator+(const std::array<double, 2> &a, const std::array<double, 2> &b)
+    {
+        std::array<double, 2> ret = a;
+        for (unsigned i = 0; i < a.size(); i++)
+            ret[i] += b[i];
+        return ret;
+    }
+
     inline std::array<double, 2> operator*(const std::array<double, 2> &a, double b)
     {
         std::array<double, 2> ret = a;

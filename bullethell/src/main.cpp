@@ -171,6 +171,7 @@ game_c initialize_all()
     //     {"up", SDL_SCANCODE_UP},
     //     {"down", SDL_SCANCODE_DOWN}});
     // stickman
+
     game.keyboard_map = std::map<std::string, int>{
         {"right", SDL_SCANCODE_RIGHT},
         {"left", SDL_SCANCODE_LEFT},
@@ -180,6 +181,11 @@ game_c initialize_all()
         {"jump_up", SDL_KEYUP},
         {"jump_down", SDL_KEYDOWN},
     };
+
+    // game.keyboard_map1 = std::map<std::string, std::map<int, int>>{
+    //     {"jump_up", {SDL_KEYUP,SDLK_UP}},
+    //     {"jump_down", {SDL_KEYDOWN, SDLK_UP}},
+    // };
 
     //  game.player.movements = std::map<std::string, std::vector<int>{
     //     {"move_right", {5, 0}},
@@ -206,7 +212,9 @@ int process_input(game_c &game)
             if (event.key.keysym.sym == SDLK_UP)
             {
                 //std::cout << " SDLK_UP";
-                game.player.set_movements({1, 2, 200});
+                game.player.set_movements({1, 2, 200}); //set down to jump
+                //game.player.intentions["jump_down"] = 1;
+                 //game.player.change_acceleration({1, 2, 200});
             }
             if (event.key.keysym.sym == SDLK_DOWN)
             {
@@ -214,11 +222,15 @@ int process_input(game_c &game)
             }
             if (event.key.keysym.sym == SDLK_RIGHT)
             {
-                game.player.set_movements({5, 0, 100});
+                //game.player.set_movements({5, 0, 100});
+                //game.player.change_acceleration({100, 0});
+                //game.player.set_changes({100, 0});
+                game.player.intentions["right"] = 1;
             }
             if (event.key.keysym.sym == SDLK_LEFT)
             {
-                game.player.set_movements({5, 1, 100});
+                game.player.intentions["left"] = 1;
+                //game.player.set_movements({5, 1, 100});
             }
         }
 
@@ -226,7 +238,8 @@ int process_input(game_c &game)
         {
             if (event.key.keysym.sym == SDLK_UP)
             {
-                game.player.set_movements({1, 3, 200});
+                //game.player.set_movements({1, 3, 200});
+                 game.player.intentions["jump_up"] = 1;
             }
             if (event.key.keysym.sym == SDLK_DOWN)
             {
@@ -234,22 +247,25 @@ int process_input(game_c &game)
             }
             if (event.key.keysym.sym == SDLK_RIGHT)
             {
-                game.player.set_movements({1, 3, 200});
+                //game.player.set_movements({1, 3, 200});
+                game.player.intentions["stop"] = 1;
             }
             if (event.key.keysym.sym == SDLK_LEFT)
             {
-                game.player.set_movements({1, 3, 200});
+                //game.player.set_movements({1, 3, 200});
+                game.player.intentions["stop"] = 1;
             }
         }
         //---------------------
     }
-    auto kbdstate = SDL_GetKeyboardState(NULL);
-    game.player.intentions.clear();
-    for (auto [k, v] : game.keyboard_map)
-    {
-        if (kbdstate[v])
-            game.player.intentions[k] = 1;
-    }
+    //auto kbdstate = SDL_GetKeyboardState(NULL);
+    //game.player.intentions.clear();
+    //game.player.movements.clear();
+    // for (auto [k, v] : game.keyboard_map)
+    // {
+    //     if (kbdstate[v])
+    //         game.player.intentions[k] = 1;
+    // }
     return true;
 }
 //-------------------

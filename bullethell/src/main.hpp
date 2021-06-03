@@ -132,6 +132,7 @@ public:
 
     // vector<int> - {number_of_sprites_in_row, number_of_row, n_frequence}
     std::vector<int> movements;
+    //std::array<double, 2> changes;
 
     // player_c()
     // {
@@ -140,9 +141,20 @@ public:
     //     friction = 0.03;
     //     acceleration = {0, 0};
     // }
-    void set_movements(std::vector<int> m){
+    void set_movements(std::vector<int> m)
+    {
         movements = m;
     }
+    // void set_changes(std::array<double, 2> changes_)
+    // {
+    //     changes = changes_;
+    // }
+
+    // void change_acceleration(std::array<double, 2> changes)
+    // {
+    //     using namespace tp::operators;
+    //     acceleration = acceleration + changes;
+    // }
 
     player_c(std::array<double, 2> position_ = {10, 10}, std::array<double, 2> velocity_ = {0, 0}, std::array<double, 2> acceleration_ = {0, 0}, double friction_ = 0.03)
     {
@@ -160,34 +172,49 @@ public:
  * */
     void apply_intent()
     {
+        //using namespace tp::operators;
         acceleration = {0, 30};
-        // if (intentions.count("stop"))
-        // {
+        //acceleration = acceleration + changes;
 
-        //     movements = {1, 3, 400};
-        // }
-        // if (intentions.count("right"))
-        // {
-        //     acceleration[0] += 100;
-        //     // movements = {"move_right", {5, 0}};
-        //     movements = {5, 0, 100};
-        // }
-        // if (intentions.count("left"))
-        // {
-        //     acceleration[0] += -100;
-        //     // movements =  {"move_left", {5, 1}};
-        //     movements = {5, 1, 100};
-        // }
-        // if (intentions.count("up"))
-        // {
-        //     //acceleration[1] += -100;
-        //     //movements = {1, 2, 200};
-        // }
+        if (intentions.count("stop"))
+        {
+
+            movements = {1, 3, 400};
+        }
+        if (intentions.count("right"))
+        {
+            acceleration[0] += 100;
+            // movements = {"move_right", {5, 0}};
+            movements = {5, 0, 100};
+        }
+        if (intentions.count("left"))
+        {
+            acceleration[0] += -100;
+            // movements =  {"move_left", {5, 1}};
+            movements = {5, 1, 100};
+        }
+        if (intentions.count("jump_up"))
+        {
+            acceleration[1] += -250;
+            //acceleration[0] += -100;
+            movements = {1, 3, 200};
+        }
 
         // if (intentions.count("down"))
         //     acceleration[1] += +100;
 
-        //intentions.clear();
+        // if (intentions.count("jump_down"))
+        // {
+        //     //acceleration[1] += -100;
+        //     movements = {1, 2, 200};
+        // }
+        //  if (intentions.count("jump_up"))
+        // {
+        //     acceleration[1] += -70;
+        //     movements = {1, 3, 200};
+        // }
+
+        intentions.clear();
         movements.clear();
     }
 
