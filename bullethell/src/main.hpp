@@ -108,14 +108,14 @@ public:
         //wind resistance todo
     }
 
-     void update1(double dt_f, std::function<void(physical_c *, std::array<double, 2> &pos, std::array<double, 2> &vel)> callback_f)
+    void update1(double dt_f, std::function<void(physical_c *, std::array<double, 2> &pos, std::array<double, 2> &vel)> callback_f)
     {
         using namespace tp::operators;
         // apply friction:
         auto new_acceleration = acceleration - velocity * length(velocity) * friction;
         auto new_velocity = velocity + new_acceleration * dt_f;
         auto new_position = position + new_velocity * dt_f + new_acceleration * dt_f * dt_f * 0.5;
-        
+
         callback_f(this, new_position, new_velocity);
 
         //wind resistance todo
@@ -127,12 +127,11 @@ class player_c : public physical_c
 public:
     std::map<std::string, int> intentions;
     // string - name of movement
-    // vector<int> - {number_of_sprites_in_row, number_of_row} 
+    // vector<int> - {number_of_sprites_in_row, number_of_row}
     // std::map<std::string, std::vector<int>> movements;
 
-    // vector<int> - {number_of_sprites_in_row, number_of_row} 
+    // vector<int> - {number_of_sprites_in_row, number_of_row, n_frequence}
     std::vector<int> movements;
-
 
     // player_c()
     // {
@@ -141,6 +140,9 @@ public:
     //     friction = 0.03;
     //     acceleration = {0, 0};
     // }
+    void set_movements(std::vector<int> m){
+        movements = m;
+    }
 
     player_c(std::array<double, 2> position_ = {10, 10}, std::array<double, 2> velocity_ = {0, 0}, std::array<double, 2> acceleration_ = {0, 0}, double friction_ = 0.03)
     {
@@ -159,32 +161,47 @@ public:
     void apply_intent()
     {
         acceleration = {0, 30};
-        if (intentions.count("right")){
-            acceleration[0] += 100;
-            // movements = {"move_right", {5, 0}};
-             movements = {5, 0};
-        }
-        if (intentions.count("left")){
-            acceleration[0] += -100;
-           // movements =  {"move_left", {5, 1}};
-             movements = {5, 1};
-        }
-        if (intentions.count("up"))
-            acceleration[1] += -100;
-        if (intentions.count("down"))
-            acceleration[1] += +100;
+        // if (intentions.count("stop"))
+        // {
 
-        intentions.clear();
+        //     movements = {1, 3, 400};
+        // }
+        // if (intentions.count("right"))
+        // {
+        //     acceleration[0] += 100;
+        //     // movements = {"move_right", {5, 0}};
+        //     movements = {5, 0, 100};
+        // }
+        // if (intentions.count("left"))
+        // {
+        //     acceleration[0] += -100;
+        //     // movements =  {"move_left", {5, 1}};
+        //     movements = {5, 1, 100};
+        // }
+        // if (intentions.count("up"))
+        // {
+        //     //acceleration[1] += -100;
+        //     //movements = {1, 2, 200};
+        // }
+
+        // if (intentions.count("down"))
+        //     acceleration[1] += +100;
+
+        //intentions.clear();
         movements.clear();
     }
 
     void apply_intent1()
     {
         acceleration = {0, 30};
-        if (intentions.count("right")) acceleration[0] += 100;
-        if (intentions.count("left")) acceleration[0] += -100;
-        if (intentions.count("up")) acceleration[1] += -100;
-        if (intentions.count("down")) acceleration[1] += +100;
+        if (intentions.count("right"))
+            acceleration[0] += 100;
+        if (intentions.count("left"))
+            acceleration[0] += -100;
+        if (intentions.count("up"))
+            acceleration[1] += -100;
+        if (intentions.count("down"))
+            acceleration[1] += +100;
     }
 
     bool is_safe_place()
@@ -193,13 +210,13 @@ public:
     }
 };
 //-------------
-class obstacle_c {
+class obstacle_c
+{
 public:
     std::array<double, 2> position;
     std::array<double, 2> size;
     std::string texture;
 };
-
 
 class game_c
 {
@@ -214,13 +231,10 @@ public:
 
     std::vector<obstacle_c> obstacles;
 
-
     std::chrono::milliseconds dt;
 
     //std::vector<std::map<std::string, int>> keyboard_map;
     std::map<std::string, int> keyboard_map;
-
-   
 };
 
 #endif

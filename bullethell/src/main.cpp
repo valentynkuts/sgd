@@ -176,6 +176,9 @@ game_c initialize_all()
         {"left", SDL_SCANCODE_LEFT},
         {"up", SDL_SCANCODE_UP},
         {"down", SDL_SCANCODE_DOWN},
+        {"stop", SDL_KEYUP},
+        {"jump_up", SDL_KEYUP},
+        {"jump_down", SDL_KEYDOWN},
     };
 
     //  game.player.movements = std::map<std::string, std::vector<int>{
@@ -184,8 +187,8 @@ game_c initialize_all()
     //     {"jump_up", {3, 2}},
     // };
 
-    game.player.movements = {3, 2};
-    
+    game.player.movements = {3, 3, 500};
+
     return game;
 }
 
@@ -196,6 +199,49 @@ int process_input(game_c &game)
     { // check if there are some events
         if (event.type == SDL_QUIT)
             return false;
+
+        //------------todo 
+        if (event.type == SDL_KEYDOWN)
+        {
+            if (event.key.keysym.sym == SDLK_UP)
+            {
+                //std::cout << " SDLK_UP";
+                game.player.set_movements({1, 2, 200});
+            }
+            if (event.key.keysym.sym == SDLK_DOWN)
+            {
+                //game.player.set_movements({1, 3, 200});
+            }
+            if (event.key.keysym.sym == SDLK_RIGHT)
+            {
+                game.player.set_movements({5, 0, 100});
+            }
+            if (event.key.keysym.sym == SDLK_LEFT)
+            {
+                game.player.set_movements({5, 1, 100});
+            }
+        }
+
+        if (event.type == SDL_KEYUP)
+        {
+            if (event.key.keysym.sym == SDLK_UP)
+            {
+                game.player.set_movements({1, 3, 200});
+            }
+            if (event.key.keysym.sym == SDLK_DOWN)
+            {
+                //game.player.set_movements({1, 3, 200});
+            }
+            if (event.key.keysym.sym == SDLK_RIGHT)
+            {
+                game.player.set_movements({1, 3, 200});
+            }
+            if (event.key.keysym.sym == SDLK_LEFT)
+            {
+                game.player.set_movements({1, 3, 200});
+            }
+        }
+        //---------------------
     }
     auto kbdstate = SDL_GetKeyboardState(NULL);
     game.player.intentions.clear();
@@ -438,7 +484,8 @@ void draw_scene(game_c &game)
 
     // render, position_x, position_y, texture, n_freq, number_sprites, n_row, w, h, dest_x, dest_y
     //draw_animation(game.renderer_p, 10, 10, game.textures["stickman"], 4, 0, 100, 50, 50, 100, 100);
-    draw_animation(game.renderer_p, game.player.position[0],  game.player.position[1], game.textures["stickman"], game.player.movements[0], game.player.movements[1], 100, 50, 50, 100, 100);
+    //draw_animation(game.renderer_p, game.player.position[0],  game.player.position[1], game.textures["stickman"], game.player.movements[0], game.player.movements[1], game.player.movements[2], 50, 50, 100, 100);
+    draw_animation(game.renderer_p, game.player.position, game.textures["stickman"], game.player.movements[0], game.player.movements[1], game.player.movements[2], 50, 50, 100, 100);
 
     SDL_RenderPresent(game.renderer_p.get());
 }
