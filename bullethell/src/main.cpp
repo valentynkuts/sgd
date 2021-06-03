@@ -318,6 +318,62 @@ int process_input(game_c& game)
 
 //----------------------
 
+void process_physics(game_c& game)
+{
+    using namespace tp::operators;
+    /// fizyka
+    
+      double dt_f = game.dt.count() / 100.0;
+        //double dt_f = game.dt.count() / 1000.0;
+
+    auto old_player = game.player;
+          // update moves
+        game.player.apply_intent();
+        game.player.update(dt_f);
+    
+    // // check colision between players
+    // // they can interact with each other
+    // for (unsigned i = 0; i < game.players.size(); i++) {
+    //     for (unsigned j = i + 1; j < game.players.size(); j++) {
+    //         if (length(game.players[i].position - game.players[j].position) < 1.0) {
+    //             game.players[i].position = old_players[i].position;
+    //             game.players[j].position = old_players[j].position;
+    //             auto vec = game.players[i].position - game.players[j].position;
+    //             vec = vec * (1.0 / length(vec));
+    //             game.players[i].velocity = vec; //old_players[i].position;
+    //             game.players[j].velocity = vec * -1.0;
+    //         }
+    //     }
+    // }
+
+
+    // for (unsigned i = 0; i < game.players.size(); i++) {
+    //     auto &p = game.players[i];
+    //     for (auto &o : game.obstacles) {
+    //         if (!(((p.position[0]+0.7) < o.position[0]) ||
+    //             ((p.position[0]-0.7) > (o.position[0]+o.size[0])) ||
+    //             ((p.position[1]+0.7) < o.position[1]) ||
+    //             ((p.position[1]-0.7) > (o.position[1]+o.size[1])))) {
+    //                 p.position = old_players[i].position;
+    //                 p.velocity = {0,0};
+    //             }
+    //     }
+    // }
+
+
+    // // TODO
+
+    // // check collisions with ground - always active
+    // for (unsigned i = 0; i < game.players.size(); i++) {
+    //     if (game.players[i].position[1] < 32) {
+    //         game.players[i].friction = 0.2;
+    //     } else {
+    //         game.players[i].velocity = {(game.players[i].velocity[0] * game.players[i].velocity[0] > 2.2) ? game.players[i].velocity[0] : 0.0, 0};
+    //         game.players[i].position[1] = 32;
+    //         game.players[i].friction = 0.3;
+    //     }
+    // }
+}
 
 void draw_scene(game_c& game)
 {
@@ -381,34 +437,16 @@ int main(int, char**)
     for (bool game_active = true; game_active;) {
         game_active = process_input(game);
 
-         //TODO
+         //TODO------------
          /// fizyka
-        double dt_f = game.dt.count() / 100.0;
-        //double dt_f = game.dt.count() / 1000.0;
-        game.player.apply_intent();
-        
-
-        game.player.update(dt_f);
-
+        // double dt_f = game.dt.count() / 100.0;
+        // //double dt_f = game.dt.count() / 1000.0;
+        // game.player.apply_intent();
+        // game.player.update(dt_f);
+        //---------------- 
+        process_physics(game); 
         draw_scene(game);
 
-        /// grafika
-        // SDL_SetRenderDrawColor(game.renderer_p.get(), 0, 100, 20, 255);
-        // SDL_RenderClear(game.renderer_p.get());
-        // SDL_SetRenderDrawColor(game.renderer_p.get(), 255, 100, 200, 255);
-
-        // // show photo 'tex_p' as background
-        // //SDL_RenderCopy(game.renderer_p.get(), game.textures["background"], NULL, NULL);
-
-        
-        // // show small photo 'tex_p' without rotation
-        // draw_o(game.renderer_p, game.player.position, game.textures["player1"], 100, 160, 0);
-
-        // // render, position_x, position_y, texture, n_freq, umber_sprites, w, h, dest_x, dest_y
-        // vk::draw_animation(game.renderer_p, 10, 10, game.textures["stickman"], 4, 0, 100, 50, 50, 100, 100);
-
-        // //------------------
-        // SDL_RenderPresent(game.renderer_p.get());
 
         this_thread::sleep_until(current_time = current_time + game.dt);
 
