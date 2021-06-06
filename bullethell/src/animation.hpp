@@ -34,6 +34,7 @@ namespace vk
         SDL_Rect dstrect = {p[0], p[1], dest_w, dest_h};
         SDL_RenderCopy(r.get(), tex.get(), &srcrect, &dstrect);
 
+        std::cout << p[0] << "   " << p[1] << std::endl;
     }
 
     void draw_animation1(std::shared_ptr<SDL_Renderer> r,
@@ -59,7 +60,7 @@ namespace vk
         SDL_Rect dstrect = {p[0], p[1], dest_w, dest_h};
         SDL_RenderCopy(r.get(), tex.get(), &srcrect, &dstrect);
     }
-   
+
     int draw_animation2(std::shared_ptr<SDL_Renderer> r,
                         int x,
                         int y,
