@@ -40,7 +40,7 @@ void draw_o(std::shared_ptr<SDL_Renderer> r, std::array<double, 2> p, std::share
     SDL_Rect dst_rect = {(int)(p[0] - w / 2), (int)(p[1] - h / 2), (int)w, (int)h};
     //show photo 'tex'
     SDL_RenderCopyEx(r.get(), tex.get(), NULL, &dst_rect, a, NULL, SDL_RendererFlip::SDL_FLIP_NONE);
-    
+
     std::cout << p[0] << "   " << p[1] << std::endl;
 }
 
@@ -69,8 +69,8 @@ game_c initialize_all()
     SDL_RenderSetLogicalSize(game.renderer_p.get(), 640, 360);
 
     /// MEDIA
-
-    game.textures["background"] = std::shared_ptr<SDL_Texture>(IMG_LoadTexture(game.renderer_p.get(), "data/ring.jpg"),
+    
+    game.textures["background"] = std::shared_ptr<SDL_Texture>(IMG_LoadTexture(game.renderer_p.get(), "data/bg0000.png"), //"data/ring.jpg"
                                                                [](auto *tex)
                                                                { SDL_DestroyTexture(tex); });
 
@@ -84,9 +84,9 @@ game_c initialize_all()
     ////-----------
 
     /// PLAYERS
-    game.player = player_c({50,50}); 
+    game.player = player_c({50, 50});
     //game.player = player_c();
-    
+
     /// OBSTACLES
     // obstacle_c o;
     // o.position = {30,10};
@@ -123,13 +123,12 @@ int process_input(game_c &game)
         if (event.type == SDL_QUIT)
             return false;
 
-        //------------todo 
+        //------------todo
         if (event.type == SDL_KEYDOWN)
         {
             if (event.key.keysym.sym == SDLK_UP)
             {
                 game.player.set_movements({1, 2, 200}); //set down to jump
-                
             }
             if (event.key.keysym.sym == SDLK_DOWN)
             {
@@ -137,26 +136,23 @@ int process_input(game_c &game)
             }
             if (event.key.keysym.sym == SDLK_RIGHT)
             {
-                
+
                 game.player.intentions["steps_right"] = 1;
             }
             if (event.key.keysym.sym == SDLK_LEFT)
             {
                 game.player.intentions["steps_left"] = 1;
-                
             }
 
             if (event.key.keysym.sym == SDLK_d)
             {
                 game.player.intentions["forward_roll_right"] = 1;
-                
             }
 
             if (event.key.keysym.sym == SDLK_q)
             {
-                
+
                 game.player.set_movements({1, 5, 200}); //set down to jump
-                
             }
         }
 
@@ -164,7 +160,7 @@ int process_input(game_c &game)
         {
             if (event.key.keysym.sym == SDLK_UP)
             {
-                 game.player.intentions["jump_up"] = 1;
+                game.player.intentions["jump_up"] = 1;
             }
             if (event.key.keysym.sym == SDLK_DOWN)
             {
@@ -177,12 +173,12 @@ int process_input(game_c &game)
             {
                 game.player.intentions["stop"] = 1;
             }
-             if (event.key.keysym.sym == SDLK_d)
+            if (event.key.keysym.sym == SDLK_d)
             {
                 game.player.intentions["stop"] = 1;
             }
 
-             if (event.key.keysym.sym == SDLK_q)
+            if (event.key.keysym.sym == SDLK_q)
             {
                 game.player.intentions["forward_jump_right"] = 1;
             }
@@ -198,15 +194,14 @@ int process_input(game_c &game)
     //         game.player.intentions[k] = 1;
     // }
 
-     //if (kbdstate[SDL_SCANCODE_UP])
-           // game.player.intentions["up"] = 1;
+    //if (kbdstate[SDL_SCANCODE_UP])
+    // game.player.intentions["up"] = 1;
 
-        //if (kbdstate[SDL_SCANCODE_W])
-             //  game.player.intentions["forward_jump_test"] = 1;
+    //if (kbdstate[SDL_SCANCODE_W])
+    //  game.player.intentions["forward_jump_test"] = 1;
 
     return true;
 }
-
 
 void process_physics(game_c &game)
 {
@@ -254,10 +249,11 @@ void process_physics(game_c &game)
 
     // check collisions with ground - always active
     // y - limit
-    int y = 152;
+    //int y = 152;
+    int y = 250;
     if (game.player.position[1] < y) //
     {
-        game.player.friction = 0,3; // скорость падения
+        game.player.friction = 0, 3; // скорость падения
     }
     else
     {
@@ -269,8 +265,6 @@ void process_physics(game_c &game)
         game.player.position[1] = y;
         game.player.friction = 0.3;
     }
-
-    
 }
 
 void draw_scene(game_c &game)
@@ -309,18 +303,20 @@ void draw_scene(game_c &game)
     // }
     //---------------------
 
-    // show photo 'tex_p' as background
-    //SDL_RenderCopy(game.renderer_p.get(), game.textures["background"], NULL, NULL);
+    //  background 
+    SDL_RenderCopy(game.renderer_p.get(), game.textures["background"].get(), NULL, NULL);
 
     // show small photo 'tex_p' without rotation
-   // draw_o(game.renderer_p, game.player.position, game.textures["player1"], 100, 160, 0);
+    // draw_o(game.renderer_p, game.player.position, game.textures["player1"], 100, 160, 0);
+
+    ////draw_o(game.renderer_p, game.player.position, game.textures["background"], 1000, 1600, 0);
 
     // render, position_x, position_y, texture, n_freq, number_sprites, n_row, w, h, dest_x, dest_y
     //draw_animation(game.renderer_p, 10, 10, game.textures["stickman"], 4, 0, 100, 50, 50, 100, 100);
     //draw_animation(game.renderer_p, game.player.position[0],  game.player.position[1], game.textures["stickman"], game.player.movements[0], game.player.movements[1], game.player.movements[2], 50, 50, 100, 100);
-   
+
     draw_animation(game.renderer_p, game.player.position, game.textures["stickman"], game.player.movements[0], game.player.movements[1], game.player.movements[2], 50, 50, 100, 100);
-     
+
     SDL_RenderPresent(game.renderer_p.get());
 }
 
@@ -338,7 +334,7 @@ int main(int, char **)
 
         process_physics(game);
         draw_scene(game);
-
+        
         this_thread::sleep_until(current_time = current_time + game.dt);
 
         steady_clock::time_point frame_end = steady_clock::now();
