@@ -171,18 +171,6 @@ public:
         movements.clear();
     }
 
-    void apply_intent1()
-    {
-        acceleration = {0, 30};
-        if (intentions.count("right"))
-            acceleration[0] += 100;
-        if (intentions.count("left"))
-            acceleration[0] += -100;
-        if (intentions.count("up"))
-            acceleration[1] += -100;
-        if (intentions.count("down"))
-            acceleration[1] += +100;
-    }
 
     bool is_safe_place()
     {
@@ -193,8 +181,8 @@ public:
 class obstacle_c
 {
 public:
-    std::array<double, 2> position;
-    std::array<double, 2> size;
+    std::array<double, 2> position; // left top - x, y
+    std::array<double, 2> size; // h, w
     std::string texture;
 };
 

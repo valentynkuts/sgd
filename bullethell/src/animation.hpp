@@ -24,13 +24,14 @@ namespace vk
     {
 
         Uint32 ticks = SDL_GetTicks(); //get  milliseconds
-        // n - number that influences on  speed
+        // n - number that influences on  speed  // FrameRate
         // number_sprites - number of sprites in row
         // ticks / 1000 - get seconds
         Uint32 n_sprite = (ticks / n) % number_sprites; // number of sprite(frame) from 0 to number_sprites - 1
         // n_row - numder of row
         SDL_Rect srcrect = {n_sprite * w, n_row * h, w, h}; //{x, y, width_sprite, height_sprite}
-                                                            // dest_w, dest_h - sizes of animation to see
+        // dest_w, dest_h - sizes of animation to see
+        // x - p[0], y - p[1]                                 
         SDL_Rect dstrect = {p[0], p[1], dest_w, dest_h};
         SDL_RenderCopy(r.get(), tex.get(), &srcrect, &dstrect);
 

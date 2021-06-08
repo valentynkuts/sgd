@@ -44,6 +44,20 @@ void draw_o(std::shared_ptr<SDL_Renderer> r, std::array<double, 2> p, std::share
     std::cout << p[0] << "   " << p[1] << std::endl;
 }
 
+void draw_obstacle(std::shared_ptr<SDL_Renderer> r, std::array<double, 2> p, std::shared_ptr<SDL_Texture> tex, double w, double h)
+{
+    //SDL_Rect dstrect = {p[0], p[1], w, h};
+    SDL_Rect dstrect = {(int)p[0], (int)p[1], (int)w, (int)h};
+    SDL_RenderCopy(r.get(), tex.get(), NULL, &dstrect);
+} 
+
+void draw_obstacle1(std::shared_ptr<SDL_Renderer> r, std::array<double, 2> p, std::shared_ptr<SDL_Texture> tex, double w, double h, double a)
+{
+    SDL_Rect dst_rect = {(int)p[0], (int)p[1], (int)w, (int)h};
+    SDL_RenderCopyEx(r.get(), tex.get(), NULL, &dst_rect, a, NULL, SDL_RendererFlip::SDL_FLIP_NONE);
+}
+
+
 game_c initialize_all()
 {
     game_c game;
@@ -69,7 +83,7 @@ game_c initialize_all()
     SDL_RenderSetLogicalSize(game.renderer_p.get(), 640, 360);
 
     /// MEDIA
-    
+
     game.textures["background"] = std::shared_ptr<SDL_Texture>(IMG_LoadTexture(game.renderer_p.get(), "data/bg0000.png"), //"data/ring.jpg"
                                                                [](auto *tex)
                                                                { SDL_DestroyTexture(tex); });
@@ -81,18 +95,23 @@ game_c initialize_all()
     game.textures["stickman"] = std::shared_ptr<SDL_Texture>(IMG_LoadTexture(game.renderer_p.get(), "data/stickman.png"),
                                                              [](auto *tex)
                                                              { SDL_DestroyTexture(tex); });
+
+    game.textures["obstacle1"] = std::shared_ptr<SDL_Texture>(IMG_LoadTexture(game.renderer_p.get(), "data/ob.png"),
+                                                              [](auto *tex)
+                                                              { SDL_DestroyTexture(tex); });
     ////-----------
 
     /// PLAYERS
     game.player = player_c({50, 50});
     //game.player = player_c();
 
-    /// OBSTACLES
-    // obstacle_c o;
-    // o.position = {30,10};
-    // o.size = {2,5};
-    // o.texture = "font_10_blue";
-    // game.obstacles.push_back(o);
+    // OBSTACLES
+    obstacle_c o;
+    o.position = {100, 100};
+    o.size = {2, 5};
+    //o.texture = "obstacle1";    player1
+    o.texture = "obstacle1";
+    game.obstacles.push_back(o);
 
     /// physics details
     game.dt = std::chrono::milliseconds(15);
@@ -123,7 +142,7 @@ int process_input(game_c &game)
         if (event.type == SDL_QUIT)
             return false;
 
-        //------------todo
+        //event.key.keysym.sym - variable stores the value of the button.
         if (event.type == SDL_KEYDOWN)
         {
             if (event.key.keysym.sym == SDLK_UP)
@@ -277,9 +296,20 @@ void draw_scene(game_c &game)
     SDL_SetRenderDrawColor(game.renderer_p.get(), 255, 100, 200, 255);
 
     //-----------------------
-    // for (auto &o: game.obstacles) {
-    //     draw_obstacle(game.renderer_p, o.position * 10.0, game.textures.at(o.texture), o.size[0]*10, o.size[1]*10, 0);
-    // }
+
+     //  background
+    SDL_RenderCopy(game.renderer_p.get(), game.textures["background"].get(), NULL, NULL);
+
+    for (auto &o : game.obstacles)
+    {
+        draw_obstacle(game.renderer_p, o.position, game.textures.at(o.texture), o.size[0] * 10, o.size[1] * 10);
+        draw_obstacle1(game.renderer_p, o.position * 3.0, game.textures["obstacle1"], o.size[0] * 10, o.size[1] * 10, 30);
+
+        //draw_o(game.renderer_p, o.position, game.textures["obstacle1"], 16, 16, 0);
+        //draw_obstacle(game.renderer_p, o.position * 2, game.textures["obstacle1"], o.size[0] * 10, o.size[1] * 10);
+
+    }
+    //draw_o(game.renderer_p, game.player.position, game.textures["player1"], 16, 16, 0);
 
     // // DRAW ALL PLAYERS
     // for (unsigned i = 0; i < game.players.size(); i++) {
@@ -303,11 +333,10 @@ void draw_scene(game_c &game)
     // }
     //---------------------
 
-    //  background 
-    SDL_RenderCopy(game.renderer_p.get(), game.textures["background"].get(), NULL, NULL);
+   
 
     // show small photo 'tex_p' without rotation
-    // draw_o(game.renderer_p, game.player.position, game.textures["player1"], 100, 160, 0);
+     //draw_o(game.renderer_p, game.player.position, game.textures["player1"], 100, 160, 0);
 
     ////draw_o(game.renderer_p, game.player.position, game.textures["background"], 1000, 1600, 0);
 
@@ -334,7 +363,7 @@ int main(int, char **)
 
         process_physics(game);
         draw_scene(game);
-        
+
         this_thread::sleep_until(current_time = current_time + game.dt);
 
         steady_clock::time_point frame_end = steady_clock::now();
