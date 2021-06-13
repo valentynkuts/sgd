@@ -77,11 +77,16 @@ public:
 
     // vector<int> - {number_of_sprites_in_row, number_of_row, n_frequence}
     std::vector<int> movements;
-    std::vector<int> safePoints;
+    std::array<int, 4> diff_x1x2y1y2;
 
     void set_movements(std::vector<int> m)
     {
         movements = m;
+    }
+
+    void set_diff_x1x2y1y2(std::array<int, 4> d)
+    {
+        diff_x1x2y1y2 = d;
     }
 
     player_c(std::array<double, 2> position_ = {10, 10}, std::array<double, 2> velocity_ = {0, 0}, std::array<double, 2> acceleration_ = {0, 0}, double friction_ = 0.03)
@@ -114,6 +119,7 @@ public:
             acceleration[0] += 100;
             // movements = {"move_right", {5, 0}};
             movements = {5, 0, 100};
+            diff_x1x2y1y2 = {20, 77, 7, 99};
         }
         if (intentions.count("steps_left"))
         {
@@ -215,6 +221,48 @@ public:
     std::chrono::milliseconds dt;
 
     std::map<std::string, int> keyboard_map;
+
+    bool collision(player_c p, obstacle_c o)
+    {    
+        // {20, 77, 7, 99}
+        if (p.position[0] + p.diff_x1x2y1y2[0] > o.position[0] + o.size[0])
+            return true;
+        if (p.position[0] + p.diff_x1x2y1y2[1] < o.position[0])
+            return true;
+        if (p.position[1] + p.diff_x1x2y1y2[2] > o.position[1] + o.size[1])
+            return true;
+        if (p.position[1] + p.diff_x1x2y1y2[3] < o.position[1])
+            return true;
+
+        return false;
+    }
+
+     bool collision1(player_c p, obstacle_c o)
+    {    
+        // {20, 77, 7, 99}
+        if (p.position[0] + p.diff_x1x2y1y2[0] < o.position[0] + o.size[0])
+            return false;
+        if (p.position[0] + p.diff_x1x2y1y2[1] > o.position[0])
+            return false;
+        if (p.position[1] + p.diff_x1x2y1y2[2] < o.position[1] + o.size[1])
+            return false;
+        if (p.position[1] + p.diff_x1x2y1y2[3] > o.position[1])
+            return false;
+
+        return true;
+    }
+
+     bool collision2(player_c p, obstacle_c o)
+    {    
+        // {20, 77, 7, 99}
+        if ((p.position[0] + p.diff_x1x2y1y2[0] < o.position[0] + o.size[0]) ||
+            (p.position[0] + p.diff_x1x2y1y2[1] > o.position[0]) ||
+            (p.position[1] + p.diff_x1x2y1y2[2] < o.position[1] + o.size[1]) ||
+            (p.position[1] + p.diff_x1x2y1y2[3] > o.position[1]))
+            return true;
+
+        return false;
+    }
 };
 
 #endif

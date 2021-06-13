@@ -102,6 +102,7 @@ game_c initialize_all()
 
     /// PLAYER
     game.player = player_c({200, 200});
+    game.player.set_movements({20, 77, 7, 99});
     //game.player = player_c();
 
     // OBSTACLES
@@ -113,7 +114,7 @@ game_c initialize_all()
 
      game.obstacles = {
          obstacle_c({100, 100}, {30, 40}, "obstacle1", 0),
-         obstacle_c({200, 200}, {30, 40}, "obstacle1", 30),
+         //obstacle_c({200, 200}, {30, 40}, "obstacle1", 30),
          obstacle_c({300, 300}, {30, 40}, "obstacle1", 90)
      };
 
@@ -292,6 +293,15 @@ void process_physics(game_c &game)
     // }
 
     // // TODO
+
+    for (auto &o : game.obstacles)
+    { 
+        if(!game.collision(game.player, o)){
+            game.player.position = old_player.position;
+            game.player.velocity = {0,0};
+        }
+        
+    }
 
     // check collisions with ground - always active
     // y - limit
