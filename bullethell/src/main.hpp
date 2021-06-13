@@ -8,7 +8,6 @@
 #include <vector>
 #include <SDL2/SDL.h>
 
-
 class physical_c
 {
 public:
@@ -28,20 +27,19 @@ public:
         position = new_position;
         velocity = new_velocity;
         acceleration = new_acceleration;
-
     }
 
-     void update2(double dt_f)
+    void update2(double dt_f)
     {
         using namespace tp::operators;
         // apply friction:
         auto new_acceleration = acceleration - velocity * length(velocity) * friction;
         auto new_velocity = velocity + new_acceleration * dt_f;
         auto new_position = position + new_velocity * dt_f + new_acceleration * dt_f * dt_f * 0.5;
-         //std::array<double, 2> new_position = {0.0, 0.0};
+        //std::array<double, 2> new_position = {0.0, 0.0};
         //////new_position[0] = position[0] + new_velocity[0]*cos(0.4f)*dt_f;
         //////new_position[1] = position[1] + new_velocity[1]*0.5*dt_f - new_acceleration[1] * dt_f * dt_f * 0.5;
-        
+
         /*
         position[0]+= 0.6;
         position[1] = sin(0.1 * position[0]/ M_PI) * 200 + 240;
@@ -51,13 +49,11 @@ public:
 
         //position = {position[0],position[1]};
         */
-        
+
         //new_position[1] = sin(0.1 * new_position[0]/ M_PI) * 200 + 240;
         position = new_position;
         velocity = new_velocity;
         acceleration = new_acceleration;
-
-        
     }
 
     void update1(double dt_f, std::function<void(physical_c *, std::array<double, 2> &pos, std::array<double, 2> &vel)> callback_f)
@@ -72,8 +68,6 @@ public:
 
         //wind resistance todo
     }
-
-
 };
 
 class player_c : public physical_c
@@ -83,12 +77,12 @@ public:
 
     // vector<int> - {number_of_sprites_in_row, number_of_row, n_frequence}
     std::vector<int> movements;
-   
+    std::vector<int> safePoints;
+
     void set_movements(std::vector<int> m)
     {
         movements = m;
     }
-    
 
     player_c(std::array<double, 2> position_ = {10, 10}, std::array<double, 2> velocity_ = {0, 0}, std::array<double, 2> acceleration_ = {0, 0}, double friction_ = 0.03)
     {
@@ -138,10 +132,17 @@ public:
         {
             acceleration[0] += 50;
             acceleration[1] += -200;
-        
+
             movements = {1, 3, 100};
         }
 
+        if (intentions.count("forward_jump_left"))
+        {
+            acceleration[0] -= 50;
+            acceleration[1] += -200;
+
+            movements = {1, 3, 100};
+        }
 
         // if (intentions.count("down"))
         //     acceleration[1] += +100;
@@ -149,11 +150,18 @@ public:
         if (intentions.count("forward_roll_right"))
         {
             acceleration[0] += 80;
-             ////position[1] += 100;
-            movements = {5, 4, 100};
+            ////position[1] += 100;
+            movements = {4, 4, 100};
+        }
+
+        if (intentions.count("forward_roll_left"))
+        {
+            acceleration[0] -= 80;
+            ////position[1] += 100;
+            movements = {4, 7, 100};
         }
         //----------------------------
-         if (intentions.count("up"))
+        if (intentions.count("up"))
         {
             acceleration[1] += -100;
             movements = {1, 3, 200};
@@ -163,14 +171,13 @@ public:
         {
             acceleration[1] += -20;
             acceleration[0] += 20;
-             ////position[1] += 100;
+            ////position[1] += 100;
             movements = {1, 3, 100};
         }
 
         intentions.clear();
         movements.clear();
     }
-
 
     bool is_safe_place()
     {
@@ -182,8 +189,17 @@ class obstacle_c
 {
 public:
     std::array<double, 2> position; // left top - x, y
-    std::array<double, 2> size; // h, w
+    std::array<double, 2> size;     // h, w
     std::string texture;
+    int angle;
+
+    obstacle_c(std::array<double, 2> position_ = {50, 50}, std::array<double, 2> size_ = {5, 5}, std::string texture_ = "obstacle1", int angle_ = 0)
+    {
+        position = position_;
+        size = size_;
+        texture = texture_;
+        angle = angle_;
+    }
 };
 
 class game_c
@@ -193,7 +209,7 @@ public:
     std::shared_ptr<SDL_Renderer> renderer_p;
     std::map<std::string, std::shared_ptr<SDL_Texture>> textures;
     player_c player;
-    
+
     std::vector<obstacle_c> obstacles;
 
     std::chrono::milliseconds dt;

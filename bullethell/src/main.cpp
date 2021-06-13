@@ -49,14 +49,13 @@ void draw_obstacle(std::shared_ptr<SDL_Renderer> r, std::array<double, 2> p, std
     //SDL_Rect dstrect = {p[0], p[1], w, h};
     SDL_Rect dstrect = {(int)p[0], (int)p[1], (int)w, (int)h};
     SDL_RenderCopy(r.get(), tex.get(), NULL, &dstrect);
-} 
-
-void draw_obstacle1(std::shared_ptr<SDL_Renderer> r, std::array<double, 2> p, std::shared_ptr<SDL_Texture> tex, double w, double h, double a)
-{
-    SDL_Rect dst_rect = {(int)p[0], (int)p[1], (int)w, (int)h};
-    SDL_RenderCopyEx(r.get(), tex.get(), NULL, &dst_rect, a, NULL, SDL_RendererFlip::SDL_FLIP_NONE);
 }
 
+void draw_obstacle_a(std::shared_ptr<SDL_Renderer> r, std::array<double, 2> p, std::shared_ptr<SDL_Texture> tex, double w, double h, double angle)
+{
+    SDL_Rect dst_rect = {(int)p[0], (int)p[1], (int)w, (int)h};
+    SDL_RenderCopyEx(r.get(), tex.get(), NULL, &dst_rect, angle, NULL, SDL_RendererFlip::SDL_FLIP_NONE);
+}
 
 game_c initialize_all()
 {
@@ -101,33 +100,41 @@ game_c initialize_all()
                                                               { SDL_DestroyTexture(tex); });
     ////-----------
 
-    /// PLAYERS
-    game.player = player_c({50, 50});
+    /// PLAYER
+    game.player = player_c({200, 200});
     //game.player = player_c();
 
     // OBSTACLES
-    obstacle_c o;
-    o.position = {100, 100};
-    o.size = {2, 5};
-    //o.texture = "obstacle1";    player1
-    o.texture = "obstacle1";
-    game.obstacles.push_back(o);
+    //obstacle_c o;
+    //o.position = {100, 100};
+    //o.size = {2, 5};
+    //o.texture = "obstacle1";
+    //game.obstacles.push_back(o);
+
+     game.obstacles = {
+         obstacle_c({100, 100}, {30, 40}, "obstacle1", 0),
+         obstacle_c({200, 200}, {30, 40}, "obstacle1", 30),
+         obstacle_c({300, 300}, {30, 40}, "obstacle1", 90)
+     };
+
+    //obstacles
+    //std::vector<obstacle_c> obst;
 
     /// physics details
     game.dt = std::chrono::milliseconds(15);
 
     /// keyboard mapping
 
-    game.keyboard_map = std::map<std::string, int>{
-        // {"right", SDL_SCANCODE_RIGHT},
-        // {"left", SDL_SCANCODE_LEFT},
-        // {"up", SDL_SCANCODE_UP},
-        // {"down", SDL_SCANCODE_DOWN},
-        // {"stop", SDL_KEYUP},
-        // {"jump_up", SDL_KEYUP},
-        // {"jump_down", SDL_KEYDOWN},
+    /*  game.keyboard_map = std::map<std::string, int>{
+        {"right", SDL_SCANCODE_RIGHT},
+        {"left", SDL_SCANCODE_LEFT},
+        {"up", SDL_SCANCODE_UP},
+        {"down", SDL_SCANCODE_DOWN},
+        {"stop", SDL_KEYUP},
+        {"jump_up", SDL_KEYUP},
+        {"jump_down", SDL_KEYDOWN},
         {"forward_roll", SDL_SCANCODE_D},
-    };
+    }; */
 
     game.player.movements = {3, 3, 500};
 
@@ -163,15 +170,25 @@ int process_input(game_c &game)
                 game.player.intentions["steps_left"] = 1;
             }
 
-            if (event.key.keysym.sym == SDLK_d)
+            if (event.key.keysym.sym == SDLK_s)
             {
                 game.player.intentions["forward_roll_right"] = 1;
             }
 
+            if (event.key.keysym.sym == SDLK_a)
+            {
+                game.player.intentions["forward_roll_left"] = 1;
+            }
+
+            if (event.key.keysym.sym == SDLK_w)
+            {
+
+                game.player.set_movements({1, 5, 200}); //set down to jump right
+            }
             if (event.key.keysym.sym == SDLK_q)
             {
 
-                game.player.set_movements({1, 5, 200}); //set down to jump
+                game.player.set_movements({1, 6, 200}); //set down to jump left
             }
         }
 
@@ -192,19 +209,29 @@ int process_input(game_c &game)
             {
                 game.player.intentions["stop"] = 1;
             }
-            if (event.key.keysym.sym == SDLK_d)
+            if (event.key.keysym.sym == SDLK_s)
             {
                 game.player.intentions["stop"] = 1;
             }
 
-            if (event.key.keysym.sym == SDLK_q)
+            if (event.key.keysym.sym == SDLK_a)
+            {
+                game.player.intentions["stop"] = 1;
+            }
+
+            if (event.key.keysym.sym == SDLK_w)
             {
                 game.player.intentions["forward_jump_right"] = 1;
+            }
+            if (event.key.keysym.sym == SDLK_q)
+            {
+                game.player.intentions["forward_jump_left"] = 1;
             }
         }
         //---------------------
     }
-    auto kbdstate = SDL_GetKeyboardState(NULL);
+
+    // auto kbdstate = SDL_GetKeyboardState(NULL);
     //game.player.intentions.clear();
     //game.player.movements.clear();
     // for (auto [k, v] : game.keyboard_map)
@@ -297,18 +324,29 @@ void draw_scene(game_c &game)
 
     //-----------------------
 
-     //  background
+    //  background
     SDL_RenderCopy(game.renderer_p.get(), game.textures["background"].get(), NULL, NULL);
 
     for (auto &o : game.obstacles)
+    { 
+        draw_obstacle_a(game.renderer_p, o.position, game.textures.at(o.texture), o.size[0],o.size[1], o.angle);
+        
+    }
+    //it is ok
+    /* for (auto &o : game.obstacles)
     {
         draw_obstacle(game.renderer_p, o.position, game.textures.at(o.texture), o.size[0] * 10, o.size[1] * 10);
-        draw_obstacle1(game.renderer_p, o.position * 3.0, game.textures["obstacle1"], o.size[0] * 10, o.size[1] * 10, 30);
+        //draw_obstacle1(game.renderer_p, o.position * 3.0, game.textures["obstacle1"], o.size[0] * 10, o.size[1] * 20, 30);
+        draw_obstacle_a(game.renderer_p, {o.position[0] * 3.0, o.position[1] * 0.5}, game.textures["obstacle1"], o.size[0] * 10, o.size[1] * 20, 30);
+        draw_obstacle_a(game.renderer_p, {o.position[0] * 3.0, o.position[1]}, game.textures.at(o.texture), o.size[0] * 10, o.size[1] * 50, 90);
+        std::array<double, 2> position1 = {50, 50};
+        draw_obstacle_a(game.renderer_p, position1, game.textures.at(o.texture), o.size[0] * 10, o.size[1] * 10, 90);
 
         //draw_o(game.renderer_p, o.position, game.textures["obstacle1"], 16, 16, 0);
         //draw_obstacle(game.renderer_p, o.position * 2, game.textures["obstacle1"], o.size[0] * 10, o.size[1] * 10);
-
     }
+ */
+///////////////////////////////
     //draw_o(game.renderer_p, game.player.position, game.textures["player1"], 16, 16, 0);
 
     // // DRAW ALL PLAYERS
@@ -333,10 +371,8 @@ void draw_scene(game_c &game)
     // }
     //---------------------
 
-   
-
     // show small photo 'tex_p' without rotation
-     //draw_o(game.renderer_p, game.player.position, game.textures["player1"], 100, 160, 0);
+    //draw_o(game.renderer_p, game.player.position, game.textures["player1"], 100, 160, 0);
 
     ////draw_o(game.renderer_p, game.player.position, game.textures["background"], 1000, 1600, 0);
 

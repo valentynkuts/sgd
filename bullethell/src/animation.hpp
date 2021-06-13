@@ -35,7 +35,23 @@ namespace vk
         SDL_Rect dstrect = {p[0], p[1], dest_w, dest_h};
         SDL_RenderCopy(r.get(), tex.get(), &srcrect, &dstrect);
 
+        // Points
         std::cout << p[0] << "   " << p[1] << std::endl;
+
+        //SDL_RenderDrawPoint(r.get(), p[0], p[1]);
+    
+        SDL_RenderDrawPoint(r.get(), p[0]+20, p[1]+7);
+        SDL_RenderDrawPoint(r.get(), p[0]+77, p[1]+7);
+        SDL_RenderDrawPoint(r.get(), p[0]+20, p[1]+99);
+        SDL_RenderDrawPoint(r.get(), p[0]+77, p[1]+99);
+
+        // SDL_RenderDrawPoint(r.get(), p[0]+20, p[1]+45);
+        // SDL_RenderDrawPoint(r.get(), p[0]+77, p[1]+45);
+        // SDL_RenderDrawPoint(r.get(), p[0]+20, p[1]+99);
+        // SDL_RenderDrawPoint(r.get(), p[0]+77, p[1]+99);
+
+       //// SDL_RenderDrawLineF(renderer.get(), p[0]+20, p[1]+7, p[0]+77, p[1]+7);
+        
     }
 
     void draw_animation1(std::shared_ptr<SDL_Renderer> r,
