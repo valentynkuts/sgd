@@ -75,9 +75,11 @@ class player_c : public physical_c
 public:
     std::map<std::string, int> intentions;
 
-    // vector<int> - {number_of_sprites_in_row, number_of_row, n_frequence}
+    // vector<int> - {number_of_sprites_in_row, number_of_row, n_frequence, flag}
+    // flag - 0 or 1 - in order to move only left or right
     std::vector<int> movements;
     std::array<int, 4> diff_x1x2y1y2;
+    bool rl;
 
     void set_movements(std::vector<int> m)
     {
@@ -112,26 +114,28 @@ public:
         if (intentions.count("stop"))
         {
 
-            movements = {1, 3, 400};
+            movements = {1, 3, 400, 0};
         }
         if (intentions.count("steps_right"))
         {
             acceleration[0] += 100;
             // movements = {"move_right", {5, 0}};
-            movements = {5, 0, 100};
-            diff_x1x2y1y2 = {20, 77, 7, 99};
+            movements = {5, 0, 100, 1};
+            
+            //diff_x1x2y1y2 = {20, 77, 7, 99};
         }
         if (intentions.count("steps_left"))
         {
             acceleration[0] += -100;
             // movements =  {"move_left", {5, 1}};
-            movements = {5, 1, 100};
+            movements = {5, 1, 100, 1};
+            rl = true;
         }
         if (intentions.count("jump_up"))
         {
             acceleration[1] += -200;
             //acceleration[0] += -100;
-            movements = {1, 3, 200};
+            movements = {1, 3, 200, 0};
         }
 
         if (intentions.count("forward_jump_right"))
@@ -139,7 +143,7 @@ public:
             acceleration[0] += 50;
             acceleration[1] += -200;
 
-            movements = {1, 3, 100};
+            movements = {1, 3, 100, 0};
         }
 
         if (intentions.count("forward_jump_left"))
@@ -147,7 +151,7 @@ public:
             acceleration[0] -= 50;
             acceleration[1] += -200;
 
-            movements = {1, 3, 100};
+            movements = {1, 3, 100, 0};
         }
 
         // if (intentions.count("down"))
@@ -157,14 +161,14 @@ public:
         {
             acceleration[0] += 80;
             ////position[1] += 100;
-            movements = {4, 4, 100};
+            movements = {4, 4, 100, 1};
         }
 
         if (intentions.count("forward_roll_left"))
         {
             acceleration[0] -= 80;
             ////position[1] += 100;
-            movements = {4, 7, 100};
+            movements = {4, 7, 100, 1};
         }
         //----------------------------
         if (intentions.count("up"))
@@ -195,7 +199,7 @@ class obstacle_c
 {
 public:
     std::array<double, 2> position; // left top - x, y
-    std::array<double, 2> size;     // h, w
+    std::array<double, 2> size;     //  w, h
     std::string texture;
     int angle;
 
@@ -223,21 +227,55 @@ public:
     std::map<std::string, int> keyboard_map;
 
     bool collision(player_c p, obstacle_c o)
-    {    
+    {
         // {20, 77, 7, 99}
+        /*
+        //left
         if (p.position[0] + p.diff_x1x2y1y2[0] > o.position[0] + o.size[0])
             return true;
+        //right
         if (p.position[0] + p.diff_x1x2y1y2[1] < o.position[0])
             return true;
+        //top
         if (p.position[1] + p.diff_x1x2y1y2[2] > o.position[1] + o.size[1])
             return true;
+        //bottom
         if (p.position[1] + p.diff_x1x2y1y2[3] < o.position[1])
             return true;
+         */
+
+        //left
+        if (p.position[1] + p.diff_x1x2y1y2[2] > o.position[1] + o.size[1])
+        {
+            std::cout<<"----------------left"<<std::endl;
+            return true;
+        }
+
+        //top
+        if (p.position[1] + p.diff_x1x2y1y2[3] < o.position[1])
+        {
+            std::cout<<"----------------top"<<std::endl;
+            return true;
+        }
+
+        //bottom
+        if (p.position[0] + p.diff_x1x2y1y2[0] > o.position[0] + o.size[0])
+        {
+            std::cout<<"----------------bottom"<<std::endl;
+            return true;
+        }
+
+        //right
+        if (p.position[0] + p.diff_x1x2y1y2[1] < o.position[0])
+        {
+            std::cout<<"----------------right"<<std::endl;
+            return true;
+        }
 
         return false;
     }
 
-     bool collision1(player_c p, obstacle_c o)
+    /*   bool collision1(player_c p, obstacle_c o)
     {    
         // {20, 77, 7, 99}
         if (p.position[0] + p.diff_x1x2y1y2[0] < o.position[0] + o.size[0])
@@ -251,14 +289,14 @@ public:
 
         return true;
     }
-
-     bool collision2(player_c p, obstacle_c o)
-    {    
+*/
+    bool collision1(player_c p, obstacle_c o)
+    {
         // {20, 77, 7, 99}
-        if ((p.position[0] + p.diff_x1x2y1y2[0] < o.position[0] + o.size[0]) ||
-            (p.position[0] + p.diff_x1x2y1y2[1] > o.position[0]) ||
-            (p.position[1] + p.diff_x1x2y1y2[2] < o.position[1] + o.size[1]) ||
-            (p.position[1] + p.diff_x1x2y1y2[3] > o.position[1]))
+        if (((p.position[0] + p.diff_x1x2y1y2[0]) < (o.position[0] + o.size[0])) &&
+            ((p.position[0] + p.diff_x1x2y1y2[1]) > o.position[0]) &&
+            ((p.position[1] + p.diff_x1x2y1y2[2]) < (o.position[1] + o.size[1])) &&
+            ((p.position[1] + p.diff_x1x2y1y2[3]) > o.position[1]))
             return true;
 
         return false;

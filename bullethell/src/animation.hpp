@@ -40,9 +40,9 @@ namespace vk
 
         //SDL_RenderDrawPoint(r.get(), p[0], p[1]);
     
-        SDL_RenderDrawPoint(r.get(), p[0]+20, p[1]+7);
-        SDL_RenderDrawPoint(r.get(), p[0]+77, p[1]+7);
-        SDL_RenderDrawPoint(r.get(), p[0]+20, p[1]+99);
+        SDL_RenderDrawPoint(r.get(), p[0]+22, p[1]+5);
+        SDL_RenderDrawPoint(r.get(), p[0]+77, p[1]+5);
+        SDL_RenderDrawPoint(r.get(), p[0]+22, p[1]+99);
         SDL_RenderDrawPoint(r.get(), p[0]+77, p[1]+99);
 
         // SDL_RenderDrawPoint(r.get(), p[0]+20, p[1]+45);

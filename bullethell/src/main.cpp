@@ -101,8 +101,10 @@ game_c initialize_all()
     ////-----------
 
     /// PLAYER
-    game.player = player_c({200, 200});
-    game.player.set_movements({20, 77, 7, 99});
+    game.player = player_c({10, 10});
+    game.player.set_diff_x1x2y1y2({22, 77, 5, 99});
+    //game.player.set_diff_x1x2y1y2({22, 77, 5, 99});
+
     //game.player = player_c();
 
     // OBSTACLES
@@ -111,12 +113,14 @@ game_c initialize_all()
     //o.size = {2, 5};
     //o.texture = "obstacle1";
     //game.obstacles.push_back(o);
-
-     game.obstacles = {
-         obstacle_c({100, 100}, {30, 40}, "obstacle1", 0),
-         //obstacle_c({200, 200}, {30, 40}, "obstacle1", 30),
-         obstacle_c({300, 300}, {30, 40}, "obstacle1", 90)
-     };
+    game.obstacles = {
+        //obstacle_c({100, 300}, {30, 40}, "obstacle1", 0),
+        obstacle_c({200, 200}, {20, 20}, "obstacle1", 90),
+        //obstacle_c({200, 300}, {30, 40}, "obstacle1", 90),
+        //obstacle_c({350, 300}, {30, 40}, "obstacle1", 180),
+        obstacle_c({400, 320}, {20, 20}, "obstacle1", 0)
+        //obstacle_c({500, 300}, {30, 40}, "obstacle1", 45)
+    };
 
     //obstacles
     //std::vector<obstacle_c> obst;
@@ -138,6 +142,7 @@ game_c initialize_all()
     }; */
 
     game.player.movements = {3, 3, 500};
+    
 
     return game;
 }
@@ -294,14 +299,66 @@ void process_physics(game_c &game)
 
     // // TODO
 
-    for (auto &o : game.obstacles)
-    { 
-        if(!game.collision(game.player, o)){
-            game.player.position = old_player.position;
-            game.player.velocity = {0,0};
+    // for (auto &o : game.obstacles)
+    // {
+    //     if (!game.collision(game.player, o))
+    //     {
+    //         game.player.position = old_player.position;
+    //         game.player.velocity = {0, 0};
+    //         //game.player.velocity = {2,0};
+    //         //break;
+    //     }
+    // }
+
+     for (auto &o : game.obstacles)
+    {
+
+        // if(game.player.intentions["steps_right"] && !game.collision(game.player, o)){
+        //     game.player.position[1] = old_player.position[1];
+        //      //game.player.velocity = {0, 0};
+        // }
+        if(game.player.movements[3] && !game.collision(game.player, o)){
+            game.player.position[1] = old_player.position[1];
+            std::cout<<"-----------------------steps_right"<<std::endl;
         }
-        
-    }
+        if (!game.collision(game.player, o))
+        {
+           
+            {   
+                std::cout<<"--------------------OLD--"<<std::endl;
+                game.player.position = old_player.position;
+                game.player.velocity = {0, 0};
+                //game.player.velocity = {2,0};
+                //break;
+            }
+        }
+    } 
+
+    /*  auto p = game.player;
+    for (auto &o : game.obstacles)
+    {
+        if ((p.position[0] + p.diff_x1x2y1y2[0] < o.position[0] + o.size[0]))
+        {
+            game.player.position = old_player.position;
+            game.player.velocity = {0, 0};
+        }
+
+        if (!(p.position[0] + p.diff_x1x2y1y2[1] > o.position[0]))
+        {
+            //game.player.position = old_player.position;
+            game.player.velocity = {0, 0};
+        }
+        if (!(p.position[1] + p.diff_x1x2y1y2[2] < o.position[1] + o.size[1]))
+        {
+            //game.player.position = old_player.position;
+            game.player.velocity = {0, 0};
+        }
+        if (!(p.position[1] + p.diff_x1x2y1y2[3] > o.position[1]))
+        {
+            //game.player.position = old_player.position;
+            //game.player.velocity = {0, 0};
+        }
+    }  */
 
     // check collisions with ground - always active
     // y - limit
@@ -338,9 +395,8 @@ void draw_scene(game_c &game)
     SDL_RenderCopy(game.renderer_p.get(), game.textures["background"].get(), NULL, NULL);
 
     for (auto &o : game.obstacles)
-    { 
-        draw_obstacle_a(game.renderer_p, o.position, game.textures.at(o.texture), o.size[0],o.size[1], o.angle);
-        
+    {
+        draw_obstacle_a(game.renderer_p, o.position, game.textures.at(o.texture), o.size[0], o.size[1], o.angle);
     }
     //it is ok
     /* for (auto &o : game.obstacles)
@@ -356,7 +412,7 @@ void draw_scene(game_c &game)
         //draw_obstacle(game.renderer_p, o.position * 2, game.textures["obstacle1"], o.size[0] * 10, o.size[1] * 10);
     }
  */
-///////////////////////////////
+    ///////////////////////////////
     //draw_o(game.renderer_p, game.player.position, game.textures["player1"], 16, 16, 0);
 
     // // DRAW ALL PLAYERS
