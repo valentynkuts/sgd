@@ -102,7 +102,7 @@ game_c initialize_all()
 
     /// PLAYER
     game.player = player_c({10, 10});
-    game.player.set_diff_x1x2y1y2({22, 77, 5, 99});
+    game.player.set_diff_x1x2y1y2({22, 77, 9, 99});
     //game.player.set_diff_x1x2y1y2({22, 77, 5, 99});
 
     //game.player = player_c();
@@ -114,12 +114,13 @@ game_c initialize_all()
     //o.texture = "obstacle1";
     //game.obstacles.push_back(o);
     game.obstacles = {
-        //obstacle_c({100, 300}, {30, 40}, "obstacle1", 0),
-        obstacle_c({200, 200}, {20, 20}, "obstacle1", 90),
+        obstacle_c({200, 270}, {70, 10}, "obstacle1", 0),//2
+        obstacle_c({100, 200}, {20, 20}, "obstacle1", 90), //1
         //obstacle_c({200, 300}, {30, 40}, "obstacle1", 90),
-        //obstacle_c({350, 300}, {30, 40}, "obstacle1", 180),
-        obstacle_c({400, 320}, {20, 20}, "obstacle1", 0)
-        //obstacle_c({500, 300}, {30, 40}, "obstacle1", 45)
+        obstacle_c({360, 300}, {30, 40}, "obstacle1", 180), //3
+        obstacle_c({480, 320}, {70, 20}, "obstacle1", 0), //4
+        //obstacle_c({500, 300}, {30, 40}, "obstacle1", 45),
+        //obstacle_c({150, 250}, {80, 100}, "obstacle1", 0)
     };
 
     //obstacles
@@ -142,7 +143,6 @@ game_c initialize_all()
     }; */
 
     game.player.movements = {3, 3, 500};
-    
 
     return game;
 }
@@ -267,98 +267,25 @@ void process_physics(game_c &game)
     // update moves
     game.player.apply_intent();
     game.player.update(dt_f);
-    //game.player.update2(dt_f);
 
-    // // check colision between players
-    // // they can interact with each other
-    // for (unsigned i = 0; i < game.players.size(); i++) {
-    //     for (unsigned j = i + 1; j < game.players.size(); j++) {
-    //         if (length(game.players[i].position - game.players[j].position) < 1.0) {
-    //             game.players[i].position = old_players[i].position;
-    //             game.players[j].position = old_players[j].position;
-    //             auto vec = game.players[i].position - game.players[j].position;
-    //             vec = vec * (1.0 / length(vec));
-    //             game.players[i].velocity = vec; //old_players[i].position;
-    //             game.players[j].velocity = vec * -1.0;
-    //         }
-    //     }
-    // }
-
-    // for (unsigned i = 0; i < game.players.size(); i++) {
-    //     auto &p = game.players[i];
-    //     for (auto &o : game.obstacles) {
-    //         if (!(((p.position[0]+0.7) < o.position[0]) ||
-    //             ((p.position[0]-0.7) > (o.position[0]+o.size[0])) ||
-    //             ((p.position[1]+0.7) < o.position[1]) ||
-    //             ((p.position[1]-0.7) > (o.position[1]+o.size[1])))) {
-    //                 p.position = old_players[i].position;
-    //                 p.velocity = {0,0};
-    //             }
-    //     }
-    // }
-
-    // // TODO
-
-    // for (auto &o : game.obstacles)
-    // {
-    //     if (!game.collision(game.player, o))
-    //     {
-    //         game.player.position = old_player.position;
-    //         game.player.velocity = {0, 0};
-    //         //game.player.velocity = {2,0};
-    //         //break;
-    //     }
-    // }
-
-     for (auto &o : game.obstacles)
+    for (auto &o : game.obstacles)
     {
 
-        // if(game.player.intentions["steps_right"] && !game.collision(game.player, o)){
-        //     game.player.position[1] = old_player.position[1];
-        //      //game.player.velocity = {0, 0};
-        // }
-        if(game.player.movements[3] && !game.collision(game.player, o)){
+        if (game.player.movements[3] && !game.collision(game.player, o))
+        {
             game.player.position[1] = old_player.position[1];
-            std::cout<<"-----------------------steps_right"<<std::endl;
+            std::cout << "-----------------------steps_right" << std::endl;
         }
         if (!game.collision(game.player, o))
         {
-           
-            {   
-                std::cout<<"--------------------OLD--"<<std::endl;
+
+            {
+                std::cout << "--------------------OLD--" << std::endl;
                 game.player.position = old_player.position;
                 game.player.velocity = {0, 0};
-                //game.player.velocity = {2,0};
-                //break;
             }
         }
-    } 
-
-    /*  auto p = game.player;
-    for (auto &o : game.obstacles)
-    {
-        if ((p.position[0] + p.diff_x1x2y1y2[0] < o.position[0] + o.size[0]))
-        {
-            game.player.position = old_player.position;
-            game.player.velocity = {0, 0};
-        }
-
-        if (!(p.position[0] + p.diff_x1x2y1y2[1] > o.position[0]))
-        {
-            //game.player.position = old_player.position;
-            game.player.velocity = {0, 0};
-        }
-        if (!(p.position[1] + p.diff_x1x2y1y2[2] < o.position[1] + o.size[1]))
-        {
-            //game.player.position = old_player.position;
-            game.player.velocity = {0, 0};
-        }
-        if (!(p.position[1] + p.diff_x1x2y1y2[3] > o.position[1]))
-        {
-            //game.player.position = old_player.position;
-            //game.player.velocity = {0, 0};
-        }
-    }  */
+    }
 
     // check collisions with ground - always active
     // y - limit

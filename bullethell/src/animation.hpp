@@ -31,7 +31,7 @@ namespace vk
         // n_row - numder of row
         SDL_Rect srcrect = {n_sprite * w, n_row * h, w, h}; //{x, y, width_sprite, height_sprite}
         // dest_w, dest_h - sizes of animation to see
-        // x - p[0], y - p[1]                                 
+        // x - p[0], y - p[1]
         SDL_Rect dstrect = {p[0], p[1], dest_w, dest_h};
         SDL_RenderCopy(r.get(), tex.get(), &srcrect, &dstrect);
 
@@ -39,19 +39,18 @@ namespace vk
         std::cout << p[0] << "   " << p[1] << std::endl;
 
         //SDL_RenderDrawPoint(r.get(), p[0], p[1]);
-    
-        SDL_RenderDrawPoint(r.get(), p[0]+22, p[1]+5);
-        SDL_RenderDrawPoint(r.get(), p[0]+77, p[1]+5);
-        SDL_RenderDrawPoint(r.get(), p[0]+22, p[1]+99);
-        SDL_RenderDrawPoint(r.get(), p[0]+77, p[1]+99);
+
+        SDL_RenderDrawPoint(r.get(), p[0] + 22, p[1] + 9);
+        SDL_RenderDrawPoint(r.get(), p[0] + 77, p[1] + 9);
+        SDL_RenderDrawPoint(r.get(), p[0] + 22, p[1] + 99);
+        SDL_RenderDrawPoint(r.get(), p[0] + 77, p[1] + 99);
 
         // SDL_RenderDrawPoint(r.get(), p[0]+20, p[1]+45);
         // SDL_RenderDrawPoint(r.get(), p[0]+77, p[1]+45);
         // SDL_RenderDrawPoint(r.get(), p[0]+20, p[1]+99);
         // SDL_RenderDrawPoint(r.get(), p[0]+77, p[1]+99);
 
-       //// SDL_RenderDrawLineF(renderer.get(), p[0]+20, p[1]+7, p[0]+77, p[1]+7);
-        
+        //// SDL_RenderDrawLineF(renderer.get(), p[0]+20, p[1]+7, p[0]+77, p[1]+7);
     }
 
     void draw_animation1(std::shared_ptr<SDL_Renderer> r,
