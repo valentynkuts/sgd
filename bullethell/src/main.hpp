@@ -28,46 +28,6 @@ public:
         velocity = new_velocity;
         acceleration = new_acceleration;
     }
-
-    void update2(double dt_f)
-    {
-        using namespace tp::operators;
-        // apply friction:
-        auto new_acceleration = acceleration - velocity * length(velocity) * friction;
-        auto new_velocity = velocity + new_acceleration * dt_f;
-        auto new_position = position + new_velocity * dt_f + new_acceleration * dt_f * dt_f * 0.5;
-        //std::array<double, 2> new_position = {0.0, 0.0};
-        //////new_position[0] = position[0] + new_velocity[0]*cos(0.4f)*dt_f;
-        //////new_position[1] = position[1] + new_velocity[1]*0.5*dt_f - new_acceleration[1] * dt_f * dt_f * 0.5;
-
-        /*
-        position[0]+= 0.6;
-        position[1] = sin(0.1 * position[0]/ M_PI) * 200 + 240;
-        
-        std::array<double, 2> n_position = {position[0]+0.3, sin(0.1 * position[0]/ M_PI) * 200 + 240};
-        auto new_position = n_position + new_velocity * dt_f + new_acceleration * dt_f * dt_f * 0.5;
-
-        //position = {position[0],position[1]};
-        */
-
-        //new_position[1] = sin(0.1 * new_position[0]/ M_PI) * 200 + 240;
-        position = new_position;
-        velocity = new_velocity;
-        acceleration = new_acceleration;
-    }
-
-    void update1(double dt_f, std::function<void(physical_c *, std::array<double, 2> &pos, std::array<double, 2> &vel)> callback_f)
-    {
-        using namespace tp::operators;
-        // apply friction:
-        auto new_acceleration = acceleration - velocity * length(velocity) * friction;
-        auto new_velocity = velocity + new_acceleration * dt_f;
-        auto new_position = position + new_velocity * dt_f + new_acceleration * dt_f * dt_f * 0.5;
-
-        callback_f(this, new_position, new_velocity);
-
-        //wind resistance todo
-    }
 };
 
 class player_c : public physical_c
@@ -79,7 +39,6 @@ public:
     // flag - can be 0 (to move only top, ...) or 1 (to move only left , right)
     std::vector<int> movements;
     std::array<int, 4> diff_x1x2y1y2;
-    //bool rl;
 
     void set_movements(std::vector<int> m)
     {
@@ -97,9 +56,6 @@ public:
         velocity = velocity_;
         acceleration = acceleration_;
         friction = friction_;
-
-        //health = 100;
-        //points = 0;
     }
 
     /**
@@ -107,9 +63,8 @@ public:
  * */
     void apply_intent()
     {
-        //using namespace tp::operators;
+
         acceleration = {0, 5};
-        //acceleration = acceleration + changes;
 
         if (intentions.count("stop"))
         {
@@ -159,13 +114,9 @@ public:
             diff_x1x2y1y2 = {20, 77, 9, 99};
         }
 
-        // if (intentions.count("down"))
-        //     acceleration[1] += +100;
-
         if (intentions.count("forward_roll_right"))
         {
             acceleration[0] += 80;
-            ////position[1] += 100;
             movements = {4, 4, 100, 1};
 
             diff_x1x2y1y2 = {20, 77, 37, 99};
@@ -174,24 +125,9 @@ public:
         if (intentions.count("forward_roll_left"))
         {
             acceleration[0] -= 80;
-            ////position[1] += 100;
             movements = {4, 7, 100, 1};
             diff_x1x2y1y2 = {20, 77, 37, 99};
         }
-        //----------------------------
-        // if (intentions.count("up"))
-        // {
-        //     acceleration[1] += -100;
-        //     movements = {1, 3, 200};
-        // }
-
-        // if (intentions.count("forward_jump_test"))
-        // {
-        //     acceleration[1] += -20;
-        //     acceleration[0] += 20;
-        //     ////position[1] += 100;
-        //     movements = {1, 3, 100};
-        // }
 
         intentions.clear();
         movements.clear();
@@ -200,6 +136,12 @@ public:
     bool is_safe_place()
     {
         return ((position[0] < 4.0) && (position[1] > 30) && (position[0] > 0.0) && (position[1] < 33));
+    }
+
+    bool is_winner()
+    {
+        //return ((position[0]+30 < 600.0) && (position[1]+50 > 30) && (position[0]+30 > 595.0) && (position[1]+50 < 35));
+        return ((position[0] < 570.0) && (position[1] > 240) && (position[0] > 550.0) && (position[1] < 270));
     }
 };
 //-------------
@@ -227,6 +169,7 @@ public:
     std::shared_ptr<SDL_Renderer> renderer_p;
     std::map<std::string, std::shared_ptr<SDL_Texture>> textures;
     player_c player;
+    int end_game;
 
     std::vector<obstacle_c> obstacles;
 
@@ -236,76 +179,30 @@ public:
 
     bool collision(player_c p, obstacle_c o)
     {
-        // {20, 77, 7, 99}
-        /*
-        //left
-        if (p.position[0] + p.diff_x1x2y1y2[0] > o.position[0] + o.size[0])
-            return true;
-        //right
-        if (p.position[0] + p.diff_x1x2y1y2[1] < o.position[0])
-            return true;
-        //top
-        if (p.position[1] + p.diff_x1x2y1y2[2] > o.position[1] + o.size[1])
-            return true;
-        //bottom
-        if (p.position[1] + p.diff_x1x2y1y2[3] < o.position[1])
-            return true;
-         */
 
         //left
         if (p.position[1] + p.diff_x1x2y1y2[2] > o.position[1] + o.size[1])
         {
-            std::cout << "----------------left" << std::endl;
             return true;
         }
 
         //top
         if (p.position[1] + p.diff_x1x2y1y2[3] < o.position[1])
         {
-            std::cout << "----------------top" << std::endl;
             return true;
         }
 
         //bottom
         if (p.position[0] + p.diff_x1x2y1y2[0] > o.position[0] + o.size[0])
         {
-            std::cout << "----------------bottom" << std::endl;
             return true;
         }
 
         //right
         if (p.position[0] + p.diff_x1x2y1y2[1] < o.position[0])
         {
-            std::cout << "----------------right" << std::endl;
             return true;
         }
-
-        return false;
-    }
-
-    /*   bool collision1(player_c p, obstacle_c o)
-    {    
-        // {20, 77, 7, 99}
-        if (p.position[0] + p.diff_x1x2y1y2[0] < o.position[0] + o.size[0])
-            return false;
-        if (p.position[0] + p.diff_x1x2y1y2[1] > o.position[0])
-            return false;
-        if (p.position[1] + p.diff_x1x2y1y2[2] < o.position[1] + o.size[1])
-            return false;
-        if (p.position[1] + p.diff_x1x2y1y2[3] > o.position[1])
-            return false;
-
-        return true;
-    }
-*/
-    bool collision1(player_c p, obstacle_c o)
-    {
-        // {20, 77, 7, 99}
-        if (((p.position[0] + p.diff_x1x2y1y2[0]) < (o.position[0] + o.size[0])) &&
-            ((p.position[0] + p.diff_x1x2y1y2[1]) > o.position[0]) &&
-            ((p.position[1] + p.diff_x1x2y1y2[2]) < (o.position[1] + o.size[1])) &&
-            ((p.position[1] + p.diff_x1x2y1y2[3]) > o.position[1]))
-            return true;
 
         return false;
     }

@@ -26,7 +26,9 @@
 #include <tuple>
 #include <vector>
 #include "animation.hpp"
+#include "bmpfont.hpp"
 
+#include <ctime>
 #include "main.hpp"
 
 std::ostream &operator<<(std::ostream &o, const std::array<double, 2> &a)
@@ -87,10 +89,6 @@ game_c initialize_all()
                                                                [](auto *tex)
                                                                { SDL_DestroyTexture(tex); });
 
-    game.textures["player1"] = std::shared_ptr<SDL_Texture>(IMG_LoadTexture(game.renderer_p.get(), "data/g4.png"),
-                                                            [](auto *tex)
-                                                            { SDL_DestroyTexture(tex); });
-
     game.textures["stickman"] = std::shared_ptr<SDL_Texture>(IMG_LoadTexture(game.renderer_p.get(), "data/stickman.png"),
                                                              [](auto *tex)
                                                              { SDL_DestroyTexture(tex); });
@@ -98,51 +96,39 @@ game_c initialize_all()
     game.textures["obstacle1"] = std::shared_ptr<SDL_Texture>(IMG_LoadTexture(game.renderer_p.get(), "data/ob.png"),
                                                               [](auto *tex)
                                                               { SDL_DestroyTexture(tex); });
-    ////-----------
+
+    game.textures["win_fail"] = std::shared_ptr<SDL_Texture>(IMG_LoadTexture(game.renderer_p.get(), "data/win_fail.png"),
+                                                             [](auto *tex)
+                                                             { SDL_DestroyTexture(tex); });
+    game.textures["prize"] = std::shared_ptr<SDL_Texture>(IMG_LoadTexture(game.renderer_p.get(), "data/prize.png"),
+                                                          [](auto *tex)
+                                                          { SDL_DestroyTexture(tex); });
+    game.textures["font_10_blue"] = std::shared_ptr<SDL_Texture>(IMG_LoadTexture(game.renderer_p.get(), "data/oqls65n_blue.png"),
+                                                                 [](auto *tex)
+                                                                 { SDL_DestroyTexture(tex); });
 
     /// PLAYER
     game.player = player_c({10, 10});
     game.player.set_diff_x1x2y1y2({22, 77, 9, 99});
-    //game.player.set_diff_x1x2y1y2({22, 77, 5, 99});
-
-    //game.player = player_c();
 
     // OBSTACLES
-    //obstacle_c o;
-    //o.position = {100, 100};
-    //o.size = {2, 5};
-    //o.texture = "obstacle1";
-    //game.obstacles.push_back(o);
     game.obstacles = {
-        obstacle_c({200, 270}, {70, 10}, "obstacle1", 0),//2
+        obstacle_c({200, 270}, {70, 10}, "obstacle1", 0),  //2
         obstacle_c({100, 200}, {20, 20}, "obstacle1", 90), //1
         //obstacle_c({200, 300}, {30, 40}, "obstacle1", 90),
         obstacle_c({360, 300}, {30, 40}, "obstacle1", 180), //3
-        obstacle_c({480, 320}, {70, 20}, "obstacle1", 0), //4
+        obstacle_c({480, 320}, {70, 20}, "obstacle1", 0),   //4
         //obstacle_c({500, 300}, {30, 40}, "obstacle1", 45),
-        //obstacle_c({150, 250}, {80, 100}, "obstacle1", 0)
+        obstacle_c({595, 30}, {10, 10}, "obstacle1", 0)
+        //obstacle_c({595, 280}, {10, 10}, "obstacle1", 0)
     };
-
-    //obstacles
-    //std::vector<obstacle_c> obst;
 
     /// physics details
     game.dt = std::chrono::milliseconds(15);
 
-    /// keyboard mapping
-
-    /*  game.keyboard_map = std::map<std::string, int>{
-        {"right", SDL_SCANCODE_RIGHT},
-        {"left", SDL_SCANCODE_LEFT},
-        {"up", SDL_SCANCODE_UP},
-        {"down", SDL_SCANCODE_DOWN},
-        {"stop", SDL_KEYUP},
-        {"jump_up", SDL_KEYUP},
-        {"jump_down", SDL_KEYDOWN},
-        {"forward_roll", SDL_SCANCODE_D},
-    }; */
-
     game.player.movements = {3, 3, 500};
+
+    game.end_game = 3;
 
     return game;
 }
@@ -237,21 +223,6 @@ int process_input(game_c &game)
         //---------------------
     }
 
-    // auto kbdstate = SDL_GetKeyboardState(NULL);
-    //game.player.intentions.clear();
-    //game.player.movements.clear();
-    // for (auto [k, v] : game.keyboard_map)
-    // {
-    //     if (kbdstate[v])
-    //         game.player.intentions[k] = 1;
-    // }
-
-    //if (kbdstate[SDL_SCANCODE_UP])
-    // game.player.intentions["up"] = 1;
-
-    //if (kbdstate[SDL_SCANCODE_W])
-    //  game.player.intentions["forward_jump_test"] = 1;
-
     return true;
 }
 
@@ -274,7 +245,7 @@ void process_physics(game_c &game)
         if (game.player.movements[3] && !game.collision(game.player, o))
         {
             game.player.position[1] = old_player.position[1];
-            std::cout << "-----------------------steps_right" << std::endl;
+            std::cout << "-----------------------steps" << std::endl;
         }
         if (!game.collision(game.player, o))
         {
@@ -291,15 +262,12 @@ void process_physics(game_c &game)
     // y - limit
     //int y = 152;
     int y = 250;
-    if (game.player.position[1] < y) //
+    if (game.player.position[1] < y)
     {
-        game.player.friction = 0, 3; // скорость падения
+        game.player.friction = 0, 3; // influence on speed of falling down
     }
     else
     {
-        // game.player.velocity = {(game.player.velocity[0] * game.player.velocity[0] > 2.2) ? game.player.velocity[0] : 0.0, 0};
-        // game.player.position[1] = y;
-        // game.player.friction = 0.3;
 
         game.player.velocity = {(game.player.velocity[0] * game.player.velocity[0] > 2.2) ? game.player.velocity[0] : 0.0, 0.0};
         game.player.position[1] = y;
@@ -316,64 +284,34 @@ void draw_scene(game_c &game)
     SDL_RenderClear(game.renderer_p.get());
     SDL_SetRenderDrawColor(game.renderer_p.get(), 255, 100, 200, 255);
 
-    //-----------------------
-
     //  background
     SDL_RenderCopy(game.renderer_p.get(), game.textures["background"].get(), NULL, NULL);
 
+    //obstacles
     for (auto &o : game.obstacles)
     {
         draw_obstacle_a(game.renderer_p, o.position, game.textures.at(o.texture), o.size[0], o.size[1], o.angle);
     }
-    //it is ok
-    /* for (auto &o : game.obstacles)
-    {
-        draw_obstacle(game.renderer_p, o.position, game.textures.at(o.texture), o.size[0] * 10, o.size[1] * 10);
-        //draw_obstacle1(game.renderer_p, o.position * 3.0, game.textures["obstacle1"], o.size[0] * 10, o.size[1] * 20, 30);
-        draw_obstacle_a(game.renderer_p, {o.position[0] * 3.0, o.position[1] * 0.5}, game.textures["obstacle1"], o.size[0] * 10, o.size[1] * 20, 30);
-        draw_obstacle_a(game.renderer_p, {o.position[0] * 3.0, o.position[1]}, game.textures.at(o.texture), o.size[0] * 10, o.size[1] * 50, 90);
-        std::array<double, 2> position1 = {50, 50};
-        draw_obstacle_a(game.renderer_p, position1, game.textures.at(o.texture), o.size[0] * 10, o.size[1] * 10, 90);
 
-        //draw_o(game.renderer_p, o.position, game.textures["obstacle1"], 16, 16, 0);
-        //draw_obstacle(game.renderer_p, o.position * 2, game.textures["obstacle1"], o.size[0] * 10, o.size[1] * 10);
-    }
- */
-    ///////////////////////////////
-    //draw_o(game.renderer_p, game.player.position, game.textures["player1"], 16, 16, 0);
-
-    // // DRAW ALL PLAYERS
-    // for (unsigned i = 0; i < game.players.size(); i++) {
-    //     auto& player = game.players[i];
-    //     draw_o(game.renderer_p, player.position * 10.0, game.textures.at("player[" + std::to_string(i) + "]"), 16, 16, player.position[0] * 36 + player.position[1] * 5);
-    //     if (player.is_safe_place())
-    //         draw_o(game.renderer_p, player.position * 10.0, game.textures.at("player[" + std::to_string(i) + "]"), 16 + 4, 16 + 4, player.position[0] * 36 + player.position[1] * 5);
-
-    //     tp::draw_text(game.renderer_p, 10 + i * 130, 340, game.textures["font_10_red"], std::to_string((int)player.health));
-    //     tp::draw_text(game.renderer_p, 10 + i * 130 + 40, 340, game.textures["font_10_blue"], std::to_string((int)player.points));
-    // }
-    // // DRAW ALL EMITTERS
-    // for (unsigned i = 0; i < game.emitters.size(); i++) {
-    //     auto& emitter = game.emitters[i];
-    //     draw_o(game.renderer_p, emitter.position * 10.0, game.textures.at("emitter[" + std::to_string(i) + "]"), 16, 16, 0.0);
-    // }
-    // // DRAW ALL BULLETS
-    // for (unsigned i = 0; i < game.bullets.size(); i++) {
-    //     auto& bullet = game.bullets[i];
-    //     draw_o(game.renderer_p, bullet.position * 10.0, game.textures.at(bullet.type), 10, 10, 33.0);
-    // }
-    //---------------------
-
-    // show small photo 'tex_p' without rotation
-    //draw_o(game.renderer_p, game.player.position, game.textures["player1"], 100, 160, 0);
-
-    ////draw_o(game.renderer_p, game.player.position, game.textures["background"], 1000, 1600, 0);
-
-    // render, position_x, position_y, texture, n_freq, number_sprites, n_row, w, h, dest_x, dest_y
-    //draw_animation(game.renderer_p, 10, 10, game.textures["stickman"], 4, 0, 100, 50, 50, 100, 100);
-    //draw_animation(game.renderer_p, game.player.position[0],  game.player.position[1], game.textures["stickman"], game.player.movements[0], game.player.movements[1], game.player.movements[2], 50, 50, 100, 100);
+    draw_animation(game.renderer_p, {550, 250}, game.textures["prize"], 1, 0, 100, 20, 20, 30, 30);
 
     draw_animation(game.renderer_p, game.player.position, game.textures["stickman"], game.player.movements[0], game.player.movements[1], game.player.movements[2], 50, 50, 100, 100);
+
+    //------------timer-----
+
+    Uint32 ticks = SDL_GetTicks();
+
+    int seconds = ticks / 1000;
+
+    tp::draw_text(game.renderer_p, 22, 20, game.textures["font_10_blue"], std::to_string(seconds));
+
+    //----------------------
+
+    if (seconds > game.end_game)
+        draw_animation(game.renderer_p, {250, 100}, game.textures["win_fail"], 1, 1, 100, 200, 100, 200, 200); // failed
+
+    if (game.player.is_winner())
+        draw_animation(game.renderer_p, {250, 100}, game.textures["win_fail"], 1, 0, 100, 200, 100, 200, 200); // win
 
     SDL_RenderPresent(game.renderer_p.get());
 }
