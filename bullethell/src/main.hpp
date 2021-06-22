@@ -75,23 +75,18 @@ public:
         if (intentions.count("steps_right"))
         {
             acceleration[0] += 100;
-            // movements = {"move_right", {5, 0}};
             movements = {5, 0, 100, 1};
-
             diff_x1x2y1y2 = {20, 77, 9, 99};
         }
         if (intentions.count("steps_left"))
         {
             acceleration[0] += -100;
-            // movements =  {"move_left", {5, 1}};
             movements = {5, 1, 100, 1};
             diff_x1x2y1y2 = {20, 77, 9, 99};
-            //rl = true;
         }
         if (intentions.count("jump_up"))
         {
             acceleration[1] += -200;
-            //acceleration[0] += -100;
             movements = {1, 3, 200, 0};
             diff_x1x2y1y2 = {20, 77, 9, 99};
         }
@@ -100,7 +95,6 @@ public:
         {
             acceleration[0] += 50;
             acceleration[1] += -200;
-
             movements = {1, 3, 100, 0};
             diff_x1x2y1y2 = {20, 77, 9, 99};
         }
@@ -109,7 +103,6 @@ public:
         {
             acceleration[0] -= 50;
             acceleration[1] += -200;
-
             movements = {1, 3, 100, 0};
             diff_x1x2y1y2 = {20, 77, 9, 99};
         }
@@ -118,7 +111,6 @@ public:
         {
             acceleration[0] += 80;
             movements = {4, 4, 100, 1};
-
             diff_x1x2y1y2 = {20, 77, 37, 99};
         }
 
@@ -140,11 +132,10 @@ public:
 
     bool is_winner()
     {
-        //return ((position[0]+30 < 600.0) && (position[1]+50 > 30) && (position[0]+30 > 595.0) && (position[1]+50 < 35));
-        return ((position[0] < 570.0) && (position[1] > 240) && (position[0] > 550.0) && (position[1] < 270));
+        return ((position[0] + 30 < 560.0) && (position[1] + 50 > 10) && (position[0] + 30 > 530.0) && (position[1] + 50 < 30));
     }
 };
-//-------------
+
 class obstacle_c
 {
 public:
@@ -168,6 +159,7 @@ public:
     std::shared_ptr<SDL_Window> window_p;
     std::shared_ptr<SDL_Renderer> renderer_p;
     std::map<std::string, std::shared_ptr<SDL_Texture>> textures;
+    std::array<double, 2> prize_position;
     player_c player;
     int end_game;
 
@@ -180,25 +172,21 @@ public:
     bool collision(player_c p, obstacle_c o)
     {
 
-        //left
         if (p.position[1] + p.diff_x1x2y1y2[2] > o.position[1] + o.size[1])
         {
             return true;
         }
 
-        //top
         if (p.position[1] + p.diff_x1x2y1y2[3] < o.position[1])
         {
             return true;
         }
 
-        //bottom
         if (p.position[0] + p.diff_x1x2y1y2[0] > o.position[0] + o.size[0])
         {
             return true;
         }
 
-        //right
         if (p.position[0] + p.diff_x1x2y1y2[1] < o.position[0])
         {
             return true;

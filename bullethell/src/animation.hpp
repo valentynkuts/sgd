@@ -44,5 +44,28 @@ namespace vk
         // SDL_RenderDrawPoint(r.get(), p[0] + 77, p[1] + 99);
     }
 
+    // renderer, position{x,y}, photo, photo_width, photo_height, rotation  (obrót)
+    void draw_o(std::shared_ptr<SDL_Renderer> r, std::array<double, 2> p, std::shared_ptr<SDL_Texture> tex, double w, double h, double a)
+    {
+        SDL_Rect dst_rect = {(int)(p[0] - w / 2), (int)(p[1] - h / 2), (int)w, (int)h};
+        //show photo 'tex'
+        SDL_RenderCopyEx(r.get(), tex.get(), NULL, &dst_rect, a, NULL, SDL_RendererFlip::SDL_FLIP_NONE);
+
+        std::cout << p[0] << "   " << p[1] << std::endl;
+    }
+
+    void draw_obstacle(std::shared_ptr<SDL_Renderer> r, std::array<double, 2> p, std::shared_ptr<SDL_Texture> tex, double w, double h)
+    {
+        //SDL_Rect dstrect = {p[0], p[1], w, h};
+        SDL_Rect dstrect = {(int)p[0], (int)p[1], (int)w, (int)h};
+        SDL_RenderCopy(r.get(), tex.get(), NULL, &dstrect);
+    }
+
+    void draw_obstacle_a(std::shared_ptr<SDL_Renderer> r, std::array<double, 2> p, std::shared_ptr<SDL_Texture> tex, double w, double h, double angle)
+    {
+        SDL_Rect dst_rect = {(int)p[0], (int)p[1], (int)w, (int)h};
+        SDL_RenderCopyEx(r.get(), tex.get(), NULL, &dst_rect, angle, NULL, SDL_RendererFlip::SDL_FLIP_NONE);
+    }
+
 } // namespace vk
 #endif

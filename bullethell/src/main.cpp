@@ -25,39 +25,10 @@
 #include <thread>
 #include <tuple>
 #include <vector>
+#include <ctime>
 #include "animation.hpp"
 #include "bmpfont.hpp"
-
-#include <ctime>
 #include "main.hpp"
-
-std::ostream &operator<<(std::ostream &o, const std::array<double, 2> &a)
-{
-    o << "[" << a[0] << "," << a[1] << "]";
-    return o;
-}
-// renderer, position{x,y}, photo, photo_width, photo_height, rotation  (obrót)
-void draw_o(std::shared_ptr<SDL_Renderer> r, std::array<double, 2> p, std::shared_ptr<SDL_Texture> tex, double w, double h, double a)
-{
-    SDL_Rect dst_rect = {(int)(p[0] - w / 2), (int)(p[1] - h / 2), (int)w, (int)h};
-    //show photo 'tex'
-    SDL_RenderCopyEx(r.get(), tex.get(), NULL, &dst_rect, a, NULL, SDL_RendererFlip::SDL_FLIP_NONE);
-
-    std::cout << p[0] << "   " << p[1] << std::endl;
-}
-
-void draw_obstacle(std::shared_ptr<SDL_Renderer> r, std::array<double, 2> p, std::shared_ptr<SDL_Texture> tex, double w, double h)
-{
-    //SDL_Rect dstrect = {p[0], p[1], w, h};
-    SDL_Rect dstrect = {(int)p[0], (int)p[1], (int)w, (int)h};
-    SDL_RenderCopy(r.get(), tex.get(), NULL, &dstrect);
-}
-
-void draw_obstacle_a(std::shared_ptr<SDL_Renderer> r, std::array<double, 2> p, std::shared_ptr<SDL_Texture> tex, double w, double h, double angle)
-{
-    SDL_Rect dst_rect = {(int)p[0], (int)p[1], (int)w, (int)h};
-    SDL_RenderCopyEx(r.get(), tex.get(), NULL, &dst_rect, angle, NULL, SDL_RendererFlip::SDL_FLIP_NONE);
-}
 
 game_c initialize_all()
 {
@@ -108,27 +79,29 @@ game_c initialize_all()
                                                                  { SDL_DestroyTexture(tex); });
 
     /// PLAYER
-    game.player = player_c({10, 10});
+    game.player = player_c({5, 5});
     game.player.set_diff_x1x2y1y2({22, 77, 9, 99});
+
+    game.player.movements = {3, 3, 500};
+    game.prize_position = {550, 15};
+
+    game.end_game = 100;
 
     // OBSTACLES
     game.obstacles = {
-        obstacle_c({200, 270}, {70, 10}, "obstacle1", 0),  //2
-        obstacle_c({100, 200}, {20, 20}, "obstacle1", 90), //1
-        //obstacle_c({200, 300}, {30, 40}, "obstacle1", 90),
-        obstacle_c({360, 300}, {30, 40}, "obstacle1", 180), //3
-        obstacle_c({480, 320}, {70, 20}, "obstacle1", 0),   //4
-        //obstacle_c({500, 300}, {30, 40}, "obstacle1", 45),
-        obstacle_c({595, 30}, {10, 10}, "obstacle1", 0)
-        //obstacle_c({595, 280}, {10, 10}, "obstacle1", 0)
-    };
+        obstacle_c({200, 270}, {70, 10}, "obstacle1", 0),
+        obstacle_c({100, 80}, {50, 10}, "obstacle1", 0),
+        obstacle_c({250, 150}, {90, 10}, "obstacle1", 0),
+        obstacle_c({420, 100}, {70, 10}, "obstacle1", 0),
+        obstacle_c({110, 220}, {70, 10}, "obstacle1", 0),
+        obstacle_c({360, 300}, {100, 10}, "obstacle1", 0),
+        obstacle_c({480, 320}, {70, 20}, "obstacle1", 0),
+        obstacle_c({530, 70}, {50, 10}, "obstacle1", 0),
+        obstacle_c({540, 150}, {30, 5}, "obstacle1", 0),
+        obstacle_c({580, 280}, {50, 10}, "obstacle1", 0)};
 
     /// physics details
     game.dt = std::chrono::milliseconds(15);
-
-    game.player.movements = {3, 3, 500};
-
-    game.end_game = 3;
 
     return game;
 }
@@ -147,10 +120,6 @@ int process_input(game_c &game)
             if (event.key.keysym.sym == SDLK_UP)
             {
                 game.player.set_movements({1, 2, 200}); //set down to jump
-            }
-            if (event.key.keysym.sym == SDLK_DOWN)
-            {
-                //game.player.set_movements({1, 3, 200});
             }
             if (event.key.keysym.sym == SDLK_RIGHT)
             {
@@ -220,7 +189,6 @@ int process_input(game_c &game)
                 game.player.intentions["forward_jump_left"] = 1;
             }
         }
-        //---------------------
     }
 
     return true;
@@ -229,12 +197,13 @@ int process_input(game_c &game)
 void process_physics(game_c &game)
 {
     using namespace tp::operators;
+
     /// fizyka
 
     double dt_f = game.dt.count() / 100.0;
-    //double dt_f = game.dt.count() / 1000.0;
 
     auto old_player = game.player;
+
     // update moves
     game.player.apply_intent();
     game.player.update(dt_f);
@@ -287,31 +256,30 @@ void draw_scene(game_c &game)
     //  background
     SDL_RenderCopy(game.renderer_p.get(), game.textures["background"].get(), NULL, NULL);
 
-    //obstacles
+    //  obstacles
     for (auto &o : game.obstacles)
     {
         draw_obstacle_a(game.renderer_p, o.position, game.textures.at(o.texture), o.size[0], o.size[1], o.angle);
     }
+    
+    //  prize
+    draw_animation(game.renderer_p, game.prize_position, game.textures["prize"], 1, 0, 100, 20, 20, 30, 30);
 
-    draw_animation(game.renderer_p, {550, 250}, game.textures["prize"], 1, 0, 100, 20, 20, 30, 30);
-
+    //  stickman
     draw_animation(game.renderer_p, game.player.position, game.textures["stickman"], game.player.movements[0], game.player.movements[1], game.player.movements[2], 50, 50, 100, 100);
 
-    //------------timer-----
-
+    // timer
     Uint32 ticks = SDL_GetTicks();
-
     int seconds = ticks / 1000;
-
     tp::draw_text(game.renderer_p, 22, 20, game.textures["font_10_blue"], std::to_string(seconds));
 
-    //----------------------
-
+    // failed
     if (seconds > game.end_game)
-        draw_animation(game.renderer_p, {250, 100}, game.textures["win_fail"], 1, 1, 100, 200, 100, 200, 200); // failed
+        draw_animation(game.renderer_p, {250, 100}, game.textures["win_fail"], 1, 1, 100, 200, 100, 200, 200);
 
+    // win
     if (game.player.is_winner())
-        draw_animation(game.renderer_p, {250, 100}, game.textures["win_fail"], 1, 0, 100, 200, 100, 200, 200); // win
+        draw_animation(game.renderer_p, {250, 100}, game.textures["win_fail"], 1, 0, 100, 200, 100, 200, 200);
 
     SDL_RenderPresent(game.renderer_p.get());
 }
